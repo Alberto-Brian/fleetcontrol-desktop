@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input }  from '@/components/ui/input';
 import { Label }  from '@/components/ui/label';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useAuth }        from '@/contexts/AuthContext';
-import { changePassword } from '@/helpers/service-auth-helpers';
-import { toast }          from 'sonner';
-import { useTranslation } from 'react-i18next';
+import { useAuth }         from '@/contexts/AuthContext';
+import { syncLocalUser }   from '@/helpers/service-auth-helpers';
+import { changePasswordOnApi } from '@/helpers/license-helpers';
+import { toast }           from 'sonner';
+import { useTranslation }  from 'react-i18next';
 
 interface Props {
   open: boolean;
@@ -74,11 +75,31 @@ export default function ChangePasswordDialog({ open, onOpenChange }: Props) {
     if (!current)               { toast.error(t('password.currentRequired')); return; }
     setSaving(true);
     try {
-      await changePassword({ userId: user.id, currentPassword: current, newPassword: newPass });
+      // Achado real (2026-09-23): esta dialog só mudava a password LOCAL
+      // (SQLite, "cadeado do cache" da Fase 11B.10) — a password real usada
+      // para login online (/api/auth/login) nunca era tocada, ficando
+      // desalinhada e podendo trancar o utilizador fora na próxima vez que
+      // tentasse entrar online. Corrigido para mudar a password REAL
+      // primeiro (changePasswordOnApi, a mesma função já usada no gate
+      // obrigatório de primeiro acesso, ChangePasswordRequiredPage) e só
+      // depois sincronizar o registo local — nunca ao contrário, para
+      // nunca ficar "mudada" só de um lado se a chamada à API falhar.
+      await changePasswordOnApi(current, newPass);
+      await syncLocalUser({ name: user.name, email: user.email, password: newPass });
       toast.success(t('password.changeSuccess'));
       onOpenChange(false);
     } catch (err: any) {
-      toast.error(t(err?.message ?? 'errors.wrongCurrentPassword'));
+      if (err?.response) {
+        // A API respondeu e recusou (ex: senha actual errada) — mesma
+        // distinção já usada em tryRefreshOrReactivate() (Fase 11B.11):
+        // resposta presente = recusa explícita, ausente = sem ligação.
+        toast.error(err.response?.data?.message ?? t('errors.wrongCurrentPassword'));
+      } else {
+        // Sem resposta do servidor = sem ligação. Nunca mudar só
+        // localmente aqui — seria reintroduzir exactamente o bug que esta
+        // correcção fecha (password local e real a divergir).
+        toast.error(t('password.offlineNotAllowed'));
+      }
     } finally {
       setSaving(false);
     }

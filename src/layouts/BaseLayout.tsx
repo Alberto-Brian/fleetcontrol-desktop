@@ -223,28 +223,40 @@ function ConnectionStatusBadge() {
             <TraccarAlertFlash suppressed={syncShown} />
             <div className="flex items-center gap-1.5">
                 {isOnline && (
-                    <><Wifi style={{ width: 11, height: 11, color: '#4ade80' }} />
-                      <span style={{ fontSize: 11, fontWeight: 600, color: '#4ade80' }}>Online</span></>
+                    <>
+                      <Wifi style={{ width: 11, height: 11, color: '#4ade80' }} />
+                      <span style={{ fontSize: 11, fontWeight: 600, color: '#4ade80' }}>Online</span>
+                    </>
                 )}
                 {isApiOnly && (
-                    <><AlertCircle style={{ width: 11, height: 11, color: '#fbbf24' }} />
-                      <span style={{ fontSize: 11, fontWeight: 600, color: '#fbbf24' }}>Traccar offline</span></>
+                    <>
+                      <AlertCircle style={{ width: 11, height: 11, color: '#fbbf24' }} />
+                      <span style={{ fontSize: 11, fontWeight: 600, color: '#fbbf24' }}>Traccar offline</span>
+                    </>
                 )}
                 {isConnecting && (
-                    <><Loader2 style={{ width: 11, height: 11, color: '#60a5fa' }} className="animate-spin" />
-                      <span style={{ fontSize: 11, fontWeight: 600, color: '#60a5fa' }}>A ligar...</span></>
+                    <>
+                      <Loader2 style={{ width: 11, height: 11, color: '#60a5fa' }} className="animate-spin" />
+                      <span style={{ fontSize: 11, fontWeight: 600, color: '#60a5fa' }}>A ligar...</span>
+                    </>
                 )}
                 {isReconnecting && (
-                    <><Loader2 style={{ width: 11, height: 11, color: '#fbbf24' }} className="animate-spin" />
-                      <span style={{ fontSize: 11, fontWeight: 600, color: '#fbbf24' }}>A reconectar...</span></>
+                    <>
+                      <Loader2 style={{ width: 11, height: 11, color: '#fbbf24' }} className="animate-spin" />
+                      <span style={{ fontSize: 11, fontWeight: 600, color: '#fbbf24' }}>A reconectar...</span>
+                    </>
                 )}
                 {isError && (
-                    <><AlertCircle style={{ width: 11, height: 11, color: '#f87171' }} />
-                      <span style={{ fontSize: 11, fontWeight: 600, color: '#f87171' }}>Servidor inacessível</span></>
+                    <>
+                      <AlertCircle style={{ width: 11, height: 11, color: '#f87171' }} />
+                      <span style={{ fontSize: 11, fontWeight: 600, color: '#f87171' }}>Servidor inacessível</span>
+                    </>
                 )}
                 {isOffline && (
-                    <><WifiOff style={{ width: 11, height: 11, color: '#94a3b8' }} />
-                      <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>Offline</span></>
+                    <>
+                      <WifiOff style={{ width: 11, height: 11, color: '#94a3b8' }} />
+                      <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>Offline</span>
+                    </>
                 )}
             </div>
         </div>

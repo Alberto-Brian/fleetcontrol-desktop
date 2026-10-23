@@ -84,13 +84,14 @@ export const authTranslations = {
         accessTotal_other:    "{{count}} permissions in total",
       },
       password: {
-        title:           "Change Password",
-        current:         "Current password",
-        new:             "New password",
-        confirm:         "Confirm new password",
-        currentRequired: "Enter the current password",
-        changeSuccess:   "Password changed successfully",
-        save:            "Change Password",
+        title:             "Change Password",
+        current:           "Current password",
+        new:               "New password",
+        confirm:           "Confirm new password",
+        currentRequired:   "Enter the current password",
+        changeSuccess:     "Password changed successfully",
+        save:              "Change Password",
+        offlineNotAllowed: "No internet connection. Changing your password requires being online, so the new password stays valid for your next login.",
       },
       // Fase 11B.11 — estados online/offline x sessão.
       session: {
@@ -207,13 +208,14 @@ export const authTranslations = {
         accessTotal_other:    "{{count}} permissões no total",
       },
       password: {
-        title:           "Alterar Senha",
-        current:         "Senha actual",
-        new:             "Nova senha",
-        confirm:         "Confirmar nova senha",
-        currentRequired: "Introduza a senha actual",
-        changeSuccess:   "Senha alterada com sucesso",
-        save:            "Alterar Senha",
+        title:             "Alterar Senha",
+        current:           "Senha actual",
+        new:               "Nova senha",
+        confirm:           "Confirmar nova senha",
+        currentRequired:   "Introduza a senha actual",
+        changeSuccess:     "Senha alterada com sucesso",
+        save:              "Alterar Senha",
+        offlineNotAllowed: "Sem ligação à internet. Mudar a senha exige estar online, para a nova senha ficar válida no próximo login.",
       },
       // Fase 11B.11 — estados online/offline x sessão.
       session: {
@@ -227,7 +229,7 @@ export const authTranslations = {
         },
         badge: {
           offlineCacheValidTitle:         "A trabalhar offline",
-          offlineCacheValidDescription:   "A usar a última sessão válida. As alterações remotas sincronizam ao reconectar — o papel e as permissões apresentados não estão a ser reverificados enquanto offline.",
+          offlineCacheValidDescription:   "A usar a última sessão válida. As alterações remotas sincronizam ao reconectar — o cargo e as permissões apresentados não estão a ser reverificados enquanto offline.",
           offlineCacheExpiredTitle:       "Sessão cacheada expirada",
           offlineCacheExpiredDescription: "Sem ligação, e a sessão guardada expirou. Liga-te à Internet para iniciar sessão novamente.",
           noSessionOfflineTitle:          "Sem sessão disponível",
