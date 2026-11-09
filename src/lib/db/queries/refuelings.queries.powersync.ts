@@ -82,7 +82,7 @@ export async function createRefueling(data: ICreateRefueling): Promise<IRefuelin
       created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
-      id, organizationId, data.vehicle_id, data.driver_id ?? null, data.trip_id ?? null, data.station_id ?? null,
+      id, organizationId, data.vehicle_id, data.driver_id || null, data.trip_id || null, data.station_id || null,
       data.refueling_date ?? now, data.fuel_type, data.liters, data.price_per_liter, totalCost,
       data.current_mileage, data.is_full_tank ? 1 : 0, data.invoice_number ?? null, data.notes ?? null, now, now,
     ],
@@ -247,9 +247,9 @@ export async function updateRefueling(id: string, data: IUpdateRefueling): Promi
   const newTotal  = Math.round(newLiters * newPrice * 100) / 100;
 
   const updateData: Record<string, unknown> = {};
-  if (data.driver_id !== undefined) updateData.driver_id = data.driver_id ?? null;
-  if (data.trip_id !== undefined) updateData.trip_id = data.trip_id ?? null;
-  if (data.station_id !== undefined) updateData.station_id = data.station_id ?? null;
+  if (data.driver_id !== undefined) updateData.driver_id = data.driver_id || null;
+  if (data.trip_id !== undefined) updateData.trip_id = data.trip_id || null;
+  if (data.station_id !== undefined) updateData.station_id = data.station_id || null;
   if (data.fuel_type !== undefined) updateData.fuel_type = data.fuel_type;
   if (data.liters !== undefined) updateData.liters = data.liters;
   if (data.price_per_liter !== undefined) updateData.price_per_liter = data.price_per_liter;
