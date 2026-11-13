@@ -1,7 +1,7 @@
 {
     "name": "FleetControl",
     "productName": "FleetControl",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "description": "Sistema de Gestão de Frotas",
     "main": ".vite/build/main.js",
     "scripts": {
