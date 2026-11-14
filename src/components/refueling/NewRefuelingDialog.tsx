@@ -25,6 +25,7 @@ import { getAllVehicles } from '@/helpers/vehicle-helpers';
 import { getAllDrivers } from '@/helpers/driver-helpers';
 import { getActiveTrips } from '@/helpers/trip-helpers';
 import { ICreateRefueling } from '@/lib/types/refueling';
+import type { FuelType } from '@/lib/db/schemas/refuelings';
 import { useRefuelings } from '@/contexts/RefuelingsContext';
 
 const FUEL_TYPES = [
@@ -323,7 +324,7 @@ export default function NewRefuelingDialog({ onSuccess }: NewRefuelingDialogProp
                   {t('refuelings:fields.fuelType')}
                   <span className="text-destructive ml-1">*</span>
                 </Label>
-                <Select value={formData.fuel_type} onValueChange={(value) => setFormData({ ...formData, fuel_type: value })} required>
+                <Select value={formData.fuel_type} onValueChange={(value) => setFormData({ ...formData, fuel_type: value as FuelType })} required>
                   <SelectTrigger>
                     <SelectValue placeholder={t('refuelings:placeholders.selectFuelType')} />
                   </SelectTrigger>
