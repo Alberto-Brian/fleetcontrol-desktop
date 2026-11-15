@@ -5,6 +5,7 @@
 
 import { ICreateVehicle, IUpdateVehicle, IUpdateStatus, IVehicle } from '@/lib/types/vehicle';
 import { IPaginationParams, IPaginatedResult } from '@/lib/types/pagination';
+import { assertPermission } from './permission-guard';
 
 
 export async function getAllVehicles(params?: IPaginationParams): Promise<IPaginatedResult<IVehicle>> {
@@ -32,6 +33,7 @@ export async function getVehicleById(vehicleId: string): Promise<IVehicle | null
 
 export async function createVehicle(vehicleData: ICreateVehicle): Promise<IVehicle | null> {
     try {
+        assertPermission('vehicle:create');
         const result = await window._vehicles.create(vehicleData);
         return result;
     } catch (error) {
@@ -42,6 +44,7 @@ export async function createVehicle(vehicleData: ICreateVehicle): Promise<IVehic
 
 export async function updateVehicle(vehicleId: string, vehicleData: IUpdateVehicle): Promise<IVehicle | null> {
     try {
+        assertPermission('vehicle:update');
         const result = await window._vehicles.update(vehicleId, vehicleData);
         return result;
     } catch (error) {
@@ -52,6 +55,7 @@ export async function updateVehicle(vehicleId: string, vehicleData: IUpdateVehic
 
 export async function updateStatusVehicle(vehicleId: string, data: IUpdateStatus): Promise<IVehicle | null> {
     try {
+        assertPermission('vehicle:update');
         const result = await window._vehicles.updateStatus(vehicleId, data);
         return result;
     } catch (error) {
@@ -62,6 +66,7 @@ export async function updateStatusVehicle(vehicleId: string, data: IUpdateStatus
 
 export async function deleteVehicle(vehicleId: string): Promise<string | null> {
     try {
+        assertPermission('vehicle:delete');
         const result = await window._vehicles.delete(vehicleId);
         return result as string;
     } catch (error) {
@@ -83,6 +88,7 @@ export async function getAvailableVehicles(): Promise<IVehicle[]> {
 
 export async function updateVehicleMileage(vehicleId: string, mileage: number): Promise<IVehicle | null> {
     try {
+        assertPermission('vehicle:update');
         const result = await window._vehicles.updateMileage(vehicleId, mileage);
         return result;
     } catch (error) {

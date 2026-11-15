@@ -9,6 +9,7 @@ import {
   IRefuelingStats,
 } from '@/lib/types/refueling';
 import { IPaginatedResult } from '@/lib/types/pagination';
+import { assertPermission } from './permission-guard';
 // ── READ ──────────────────────────────────────────────────────────────────────
 
 export async function getAllRefuelings(
@@ -48,6 +49,7 @@ export async function getRefuelingStats(params?: {
 // ── WRITE ─────────────────────────────────────────────────────────────────────
 
 export async function createRefueling(data: ICreateRefueling): Promise<IRefueling> {
+  assertPermission('fuel:create');
   const result = await window._refuelings.create(data);
   return result;
 }
@@ -56,11 +58,13 @@ export async function updateRefueling(
   id: string,
   data: IUpdateRefueling
 ): Promise<IRefueling | null> {
+  assertPermission('fuel:update');
   const result = await window._refuelings.update(id, data);
   return result;
 }
 
 export async function deleteRefueling(id: string): Promise<boolean> {
+  assertPermission('fuel:delete');
   const result = await window._refuelings.remove(id);
   return result;
 }

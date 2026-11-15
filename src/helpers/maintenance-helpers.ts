@@ -3,6 +3,7 @@
 // ========================================
 import { ICreateMaintenance, IUpdateMaintenance, IMaintenance } from '@/lib/types/maintenance';
 import { IPaginatedResult, IPaginationParams } from '@/lib/types/pagination';
+import { assertPermission } from './permission-guard';
 
 export async function getAllMaintenances(params?: IPaginationParams): Promise<IPaginatedResult<IMaintenance>> {
     try {
@@ -24,6 +25,7 @@ export async function getMaintenanceById(id: string): Promise<IMaintenance | nul
 
 export async function createMaintenance(data: ICreateMaintenance): Promise<IMaintenance | null> {
     try {
+        assertPermission('maintenance:create');
         const result = await window._maintenances.create(data);
         return result;
     } catch (error) {
@@ -33,6 +35,7 @@ export async function createMaintenance(data: ICreateMaintenance): Promise<IMain
 
 export async function updateMaintenance(id: string, data: IUpdateMaintenance): Promise<IMaintenance | null> {
     try {
+        assertPermission('maintenance:update');
         const result = await window._maintenances.update(id, data);
         return result;
     } catch (error) {
@@ -42,6 +45,7 @@ export async function updateMaintenance(id: string, data: IUpdateMaintenance): P
 
 export async function completeMaintenance(id: string, data: IUpdateMaintenance): Promise<IMaintenance | null> {
     try {
+        assertPermission('maintenance:update');
         const result = await window._maintenances.complete(id, data);
         return result;
     } catch (error) {
@@ -51,6 +55,7 @@ export async function completeMaintenance(id: string, data: IUpdateMaintenance):
 
 export async function deleteMaintenance(id: string): Promise<string | null> {
     try {
+        assertPermission('maintenance:delete');
         const result = await window._maintenances.delete(id);
         return result as string;
     } catch (error) {

@@ -3,6 +3,7 @@
 // ========================================
 import { ICreateTrip, ICompleteTrip, ITrip } from '@/lib/types/trip';
 import { IPaginationParams, IPaginatedResult } from '@/lib/types/pagination';
+import { assertPermission } from './permission-guard';
 
 export async function getAllTrips(params?: IPaginationParams): Promise<IPaginatedResult<ITrip>> {
     try {
@@ -24,6 +25,7 @@ export async function getTripById(id: string): Promise<ITrip | null> {
 
 export async function createTrip(data: ICreateTrip): Promise<ITrip | null> {
     try {
+        assertPermission('trip:create');
         const result = await window._trips.create(data);
         return result;
     } catch (error) {
@@ -33,6 +35,7 @@ export async function createTrip(data: ICreateTrip): Promise<ITrip | null> {
 
 export async function completeTrip(id: string, data: ICompleteTrip): Promise<ITrip | null> {
     try {
+        assertPermission('trip:update');
         const result = await window._trips.complete(id, data);
         return result;
     } catch (error) {
@@ -42,6 +45,7 @@ export async function completeTrip(id: string, data: ICompleteTrip): Promise<ITr
 
 export async function cancelTrip(id: string): Promise<string | null> {
     try {
+        assertPermission('trip:update');
         const result = await window._trips.cancel(id);
         return result as string;
     } catch (error) {

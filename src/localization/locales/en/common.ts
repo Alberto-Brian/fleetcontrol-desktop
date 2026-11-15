@@ -91,6 +91,7 @@ export const enCommon = {
         licensePlateRequired: "Please enter a vehicle license plate",
     },
     errors: {
+        noPermission: "You do not have permission for this action. Contact your organization administrator.",
         errorLoading: "Error loading",
         errorLoadingCategories: "Error loading categories",
         notFound:{

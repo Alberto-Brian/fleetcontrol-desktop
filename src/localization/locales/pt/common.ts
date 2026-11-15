@@ -89,6 +89,7 @@ export const ptCommon = {
       categoryRequired: "Por favor, selecione uma categoria",
   },
   errors: {
+      noPermission: "Não tens permissão para esta acção. Fala com o administrador da organização.",
       errorLoading: "Erro ao carregar",
       errorLoadingCategories: "Erro ao carregar categorias",
       notFound:{

@@ -437,7 +437,7 @@ export const enHelp = {
         { type: 'list', items: [
           'Each permission appears as resource:action (e.g. vehicle:read, vehicle:link-device) — the same code the system uses internally to decide what to authorize',
           'A "whole organization" Scope gives you that permission across the entire fleet; a "specific resources" Scope only for the vehicles/drivers included in that Scope',
-          'If you don\'t see a permission for an action (e.g. GPS, editing vehicles), the corresponding buttons stay hidden in the relevant screens — that\'s not a bug, it\'s your current access',
+          'If you don\'t see a permission for an action (e.g. GPS, editing vehicles), the corresponding buttons are disabled (or hidden) in the relevant screens, and if you try the action it is refused right away with a red notice, without being saved — that\'s not a bug, it\'s your current access',
         ]},
         { type: 'tip', text: 'This list is for reference only — the server always makes the real decision on every request. If something looks wrong, contact an Administrator of your organization to review your Scope/permissions.' },
       ],

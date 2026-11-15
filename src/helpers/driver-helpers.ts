@@ -3,6 +3,7 @@
 // ========================================
 import { ICreateDriver, IUpdateDriver, IDriver } from '@/lib/types/driver';
 import { IPaginationParams, IPaginatedResult } from '@/lib/types/pagination';
+import { assertPermission } from './permission-guard';
 
 
 export async function getAllDrivers(params?: IPaginationParams): Promise<IPaginatedResult<IDriver>> {
@@ -25,6 +26,7 @@ export async function getDriverById(id: string): Promise<IDriver | null> {
 
 export async function createDriver(data: ICreateDriver): Promise<IDriver | null> {
     try {
+        assertPermission('driver:create');
         const result = await window._drivers.create(data);
         return result;
     } catch (error) {
@@ -34,6 +36,7 @@ export async function createDriver(data: ICreateDriver): Promise<IDriver | null>
 
 export async function updateDriver(id: string, data: IUpdateDriver): Promise<IDriver | null> {
     try {
+        assertPermission('driver:update');
         const result = await window._drivers.update(id, data);
         return result;
     } catch (error) {
@@ -43,6 +46,7 @@ export async function updateDriver(id: string, data: IUpdateDriver): Promise<IDr
 
 export async function deleteDriver(id: string): Promise<string | null> {
     try {
+        assertPermission('driver:delete');
         const result = await window._drivers.delete(id);
         return result as string;
     } catch (error) {

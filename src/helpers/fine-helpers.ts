@@ -3,9 +3,11 @@
 // ========================================
 import { ICreateFine, IUpdateFine, IFine, PayFineData } from "@/lib/types/fine";
 import { IPaginatedResult, IPaginationParams } from "@/lib/types/pagination";
+import { assertPermission } from './permission-guard';
 
 export async function createFine(data: ICreateFine): Promise<IFine> {
     try {
+        assertPermission('fine:create');
         const result = await window._fines.create(data);
         return result;
     } catch (error) {
@@ -34,6 +36,7 @@ export async function getFineById(id: string): Promise<IFine | null> {
 
 export async function updateFine(id: string, data: IUpdateFine): Promise<IFine> {
     try {
+        assertPermission('fine:update');
         const result = await window._fines.update(id, data);
         return result;
     } catch (error) {
@@ -43,6 +46,7 @@ export async function updateFine(id: string, data: IUpdateFine): Promise<IFine> 
 
 export async function markFineAsPaid(id: string, data: PayFineData): Promise<IFine> {
     try {
+        assertPermission('fine:update');
         const result = await window._fines.markAsPaid(id, data);
         return result;
     } catch (error) {
@@ -52,6 +56,7 @@ export async function markFineAsPaid(id: string, data: PayFineData): Promise<IFi
 
 export async function deleteFine(id: string): Promise<string> {
     try {
+        assertPermission('fine:delete');
         const result = await window._fines.delete(id);
         return result;
     } catch (error) {

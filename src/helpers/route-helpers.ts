@@ -1,8 +1,10 @@
 // src/helpers/routes-helpers.ts
 import { ICreateRoute, IUpdateRoute, IRoute } from "@/lib/types/route";
+import { assertPermission } from './permission-guard';
 
 export async function createRoute(data: ICreateRoute): Promise<IRoute> {
     try {
+        assertPermission('route:create');
         const result = await window._routes.create(data);
         return result;
     } catch (error) {
@@ -33,6 +35,7 @@ export async function getRouteById(id: string): Promise<IRoute | null> {
 
 export async function updateRoute(id: string, data: IUpdateRoute): Promise<IRoute> {
     try {
+        assertPermission('route:update');
         const result = await window._routes.update(id, data);
         return result;
     } catch (error) {
@@ -43,6 +46,7 @@ export async function updateRoute(id: string, data: IUpdateRoute): Promise<IRout
 
 export async function deleteRoute(id: string): Promise<string> {
     try {
+        assertPermission('route:delete');
         const result = await window._routes.delete(id);
         return result;
     } catch (error) {
