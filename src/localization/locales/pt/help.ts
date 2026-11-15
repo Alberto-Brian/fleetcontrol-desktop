@@ -439,7 +439,7 @@ export const ptHelp = {
         { type: 'list', items: [
           'Cada permissão aparece no formato recurso:acção (ex: vehicle:read, vehicle:link-device) — o mesmo código que o sistema usa internamente para decidir o que autorizar',
           'Um Scope "Organização inteira" dá-te essa permissão em toda a frota; um Scope de "Recursos específicos" só nos veículos/motoristas incluídos nesse Scope',
-          'Se não vires nenhuma permissão para uma acção (ex: GPS, edição de veículos), os botões correspondentes ficam desactivados (ou escondidos) nas telas relevantes, e se tentares a acção ela é recusada logo, com um aviso vermelho, sem chegar a ser gravada — não é um erro, é o teu acesso actual',
+          'Se não vires nenhuma permissão para uma acção (ex: GPS, edição de veículos), os botões correspondentes ficam desactivados nas telas relevantes (ao passar o rato aparece «Sem permissão»), e se tentares a acção ela é recusada logo, com um aviso vermelho, sem chegar a ser gravada — não é um erro, é o teu acesso actual',
         ]},
         { type: 'tip', text: 'Esta lista é só para consulta — quem decide mesmo se uma acção é permitida é sempre o servidor, em cada pedido. Se algo parecer errado, contacta um Administrador da tua organização para rever o teu Scope/permissões.' },
       ],

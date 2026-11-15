@@ -43,6 +43,8 @@ import MarkAsPaidDialog from '@/components/expense/MarkAsPaidDialog';
 import NewExpenseCategoryDialog from '@/components/expense/NewExpenseCategoryDialog';
 import EditExpenseCategoryDialog from '@/components/expense/EditExpenseCategoryDialog';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { PermissionGate } from '@/components/PermissionGate';
+import { usePermission } from '@/hooks/usePermission';
 
 function fmt(n: number, suffix = '') {
   const abs = Math.abs(n);
@@ -57,6 +59,7 @@ type ViewMode = 'compact' | 'normal' | 'cards';
 export default function ExpensesPageContent() {
   const { t } = useTranslation();
   const { handleError, showSuccess } = useErrorHandler();
+  const canEditExpenseCategory = usePermission('category:update');
 
   const {
     state: { expenses, categories, isLoading, isCategoriesLoading, selectedExpense, selectedCategory },
@@ -328,17 +331,17 @@ export default function ExpensesPageContent() {
                   <DropdownMenuItem onClick={() => { selectExpense(expense); setViewDialogOpen(true); }}>
                     <Eye className="w-4 h-4 mr-2" />{t('expenses:actions.view')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => { selectExpense(expense); setEditDialogOpen(true); }}>
+                  <PermissionGate permission="expense:update" fullWidth><DropdownMenuItem onClick={() => { selectExpense(expense); setEditDialogOpen(true); }}>
                     <Edit className="w-4 h-4 mr-2" />{t('expenses:actions.edit')}
-                  </DropdownMenuItem>
+                  </DropdownMenuItem></PermissionGate>
                   {expense.status === 'pending' && (
-                    <DropdownMenuItem className="text-emerald-600 focus:text-emerald-600" onClick={() => { selectExpense(expense); setMarkAsPaidDialogOpen(true); }}>
+                    <PermissionGate permission="expense:update" fullWidth><DropdownMenuItem className="text-emerald-600 focus:text-emerald-600" onClick={() => { selectExpense(expense); setMarkAsPaidDialogOpen(true); }}>
                       <CheckCircle2 className="w-4 h-4 mr-2" />{t('expenses:actions.markAsPaid')}
-                    </DropdownMenuItem>
+                    </DropdownMenuItem></PermissionGate>
                   )}
-                  <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteExpenseDialog(expense)}>
+                  <PermissionGate permission="expense:delete" fullWidth><DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteExpenseDialog(expense)}>
                     <Trash2 className="w-4 h-4 mr-2" />{t('expenses:actions.delete')}
-                  </DropdownMenuItem>
+                  </DropdownMenuItem></PermissionGate>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -390,7 +393,7 @@ function renderNormalView() {
                   >
                     <Eye className="w-5 h-5" />
                   </Button>
-                  <Button 
+                  <PermissionGate permission="expense:update"><Button 
                     variant="outline" 
                     size="icon" 
                     className="h-10 w-10"
@@ -398,9 +401,9 @@ function renderNormalView() {
                     title={t('expenses:actions.edit')}
                   >
                     <Edit className="w-5 h-5" />
-                  </Button>
+                  </Button></PermissionGate>
                   {expense.status === 'pending' && (
-                    <Button 
+                    <PermissionGate permission="expense:update"><Button 
                       variant="outline" 
                       size="icon" 
                       className="h-10 w-10 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border-emerald-200"
@@ -408,9 +411,9 @@ function renderNormalView() {
                       title={t('expenses:actions.markAsPaid')}
                     >
                       <CheckCircle2 className="w-5 h-5" />
-                    </Button>
+                    </Button></PermissionGate>
                   )}
-                  <Button 
+                  <PermissionGate permission="expense:delete"><Button 
                     variant="outline" 
                     size="icon" 
                     className="h-10 w-10 text-destructive hover:text-destructive hover:bg-destructive/10"
@@ -418,7 +421,7 @@ function renderNormalView() {
                     title={t('expenses:actions.delete')}
                   >
                     <Trash2 className="w-5 h-5" />
-                  </Button>
+                  </Button></PermissionGate>
                 </div>
               </div>
             </div>
@@ -500,7 +503,7 @@ function renderCardsView() {
                   {isPending ? (
                     // PENDENTE (inclui atrasadas): Marcar como Pago (prioridade) + Ver
                     <>
-                      <Button 
+                      <PermissionGate permission="expense:update"><Button 
                         variant="outline" 
                         size="sm" 
                         className="flex-1 h-9 text-xs font-bold text-emerald-600 border-emerald-200 hover:bg-emerald-50"
@@ -512,7 +515,7 @@ function renderCardsView() {
                       >
                         <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
                         {t('expenses:actions.markAsPaid')}
-                      </Button>
+                      </Button></PermissionGate>
                       <Button 
                         className="flex-[2] h-9 text-xs font-bold shadow-sm"
                         onClick={(e) => { 
@@ -528,7 +531,7 @@ function renderCardsView() {
                   ) : isPaid ? (
                     // PAGO: Editar + Ver
                     <>
-                      <Button 
+                      <PermissionGate permission="expense:update"><Button 
                         variant="outline" 
                         size="sm" 
                         className="flex-1 h-9 text-xs font-bold bg-background hover:bg-muted"
@@ -540,7 +543,7 @@ function renderCardsView() {
                       >
                         <Edit className="w-3.5 h-3.5 mr-1.5" />
                         {t('expenses:actions.edit')}
-                      </Button>
+                      </Button></PermissionGate>
                       <Button 
                         className="flex-[2] h-9 text-xs font-bold shadow-sm"
                         onClick={(e) => { 
@@ -815,7 +818,7 @@ function renderCardsView() {
               <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in duration-300">
                 {filteredCategories.map((category) => (
                   <Card key={category.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 bg-card border-muted/60 cursor-pointer"
-                    onClick={() => { selectCategory(category); setEditCategoryDialogOpen(true); }}>
+                    onClick={canEditExpenseCategory ? () => { selectCategory(category); setEditCategoryDialogOpen(true); } : undefined}>
                     <CardHeader className="pb-3 pt-5 px-5">
                       <div className="flex justify-between items-start mb-3">
                         <div className="p-2.5 rounded-xl transition-colors" style={{ backgroundColor: `${category.color}20` }}>
@@ -836,14 +839,14 @@ function renderCardsView() {
                         <span className="text-[11px] font-mono font-bold text-muted-foreground uppercase tracking-wider">{category.color}</span>
                       </div>
                       <div className="mt-auto pt-4 border-t border-muted/50 flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold bg-background hover:bg-muted"
+                        <PermissionGate permission="category:update"><Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold bg-background hover:bg-muted"
                           onClick={(e) => { e.stopPropagation(); selectCategory(category); setEditCategoryDialogOpen(true); }}>
                           <Edit className="w-3.5 h-3.5 mr-1.5" />{t('common:actions.edit')}
-                        </Button>
-                        <Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive bg-background"
+                        </Button></PermissionGate>
+                        <PermissionGate permission="category:delete"><Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive bg-background"
                           onClick={(e) => { e.stopPropagation(); openDeleteCategoryDialog(category); }}>
                           <Trash2 className="w-3.5 h-3.5 mr-1.5" />{t('common:actions.delete')}
-                        </Button>
+                        </Button></PermissionGate>
                       </div>
                     </CardContent>
                   </Card>

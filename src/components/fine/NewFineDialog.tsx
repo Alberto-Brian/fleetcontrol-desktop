@@ -17,6 +17,7 @@ import { getAllVehicles } from '@/helpers/vehicle-helpers';
 import { getAllDrivers } from '@/helpers/driver-helpers';
 import { ICreateFine } from '@/lib/types/fine';
 import { useFines } from '@/contexts/FinesContext';
+import { PermissionGate } from '@/components/PermissionGate';
 
 // Lista estática — Select normal
 const INFRACTION_TYPES = [
@@ -128,12 +129,12 @@ export default function NewFineDialog({ onSuccess }: NewFineDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <PermissionGate permission="fine:create"><DialogTrigger asChild>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
           {t('fines:newFine')}
         </Button>
-      </DialogTrigger>
+      </DialogTrigger></PermissionGate>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">

@@ -19,6 +19,7 @@ import UpdateDriverStatusDialog from './UpdateDriverStatusDialog';
 import UpdateDriverAvailabilityDialog from './UpdateDriverAvailabilityDialog';
 import UpdateDriverLicenseDialog from './UpdateDriverLicenseDialog';
 import UpdateDriverContactDialog from './UpdateDriverContactDialog';
+import { PermissionGate } from '@/components/PermissionGate';
 
 interface ViewDriverDialogProps {
   open: boolean;
@@ -109,7 +110,7 @@ export default function ViewDriverDialog({ open, onOpenChange }: ViewDriverDialo
               </p>
               <div className="grid grid-cols-2 gap-3">
                 {/* Disponibilidade - Desabilitado quando em viagem */}
-                <button
+                <PermissionGate permission="driver:update"><button
                   onClick={() => !isOnTrip && setAvailabilityDialogOpen(true)}
                   className={cn(
                     "flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left group relative overflow-hidden",
@@ -139,10 +140,10 @@ export default function ViewDriverDialog({ open, onOpenChange }: ViewDriverDialo
                       </span>
                     </div>
                   )}
-                </button>
+                </button></PermissionGate>
 
                 {/* Estado Contratual - Desabilitado quando em licença */}
-                <button
+                <PermissionGate permission="driver:update"><button
                   onClick={() => !isOnLeave && setStatusDialogOpen(true)}
                   className={cn(
                     "flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left group relative overflow-hidden",
@@ -172,10 +173,10 @@ export default function ViewDriverDialog({ open, onOpenChange }: ViewDriverDialo
                       </span>
                     </div>
                   )}
-                </button>
+                </button></PermissionGate>
 
                 {/* Carta */}
-                <button
+                <PermissionGate permission="driver:update"><button
                   onClick={() => setLicenseDialogOpen(true)}
                   className={cn(
                     "flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left group",
@@ -200,10 +201,10 @@ export default function ViewDriverDialog({ open, onOpenChange }: ViewDriverDialo
                         : t('drivers:dialogs.view.updateLicense')}
                     </p>
                   </div>
-                </button>
+                </button></PermissionGate>
 
                 {/* Contacto */}
-                <button
+                <PermissionGate permission="driver:update"><button
                   onClick={() => setContactDialogOpen(true)}
                   className="flex items-center gap-3 p-4 rounded-xl border-2 border-border bg-card hover:border-purple-500/50 hover:bg-purple-50/50 transition-all text-left group"
                 >
@@ -214,7 +215,7 @@ export default function ViewDriverDialog({ open, onOpenChange }: ViewDriverDialo
                     <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t('drivers:fields.phone')}</p>
                     <p className="font-bold text-sm mt-0.5">{t('drivers:dialogs.view.updateContact')}</p>
                   </div>
-                </button>
+                </button></PermissionGate>
               </div>
 
               {/* Info quando em viagem */}

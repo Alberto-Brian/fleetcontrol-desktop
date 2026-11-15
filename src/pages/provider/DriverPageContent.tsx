@@ -56,6 +56,7 @@ import {
   DropdownMenuTrigger, closeDropdownsAndOpenDialog,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { PermissionGate } from '@/components/PermissionGate';
 
 function fmt(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
@@ -326,12 +327,12 @@ export default function DriversPageContent() {
                     <Button size="sm" variant="outline" onClick={() => { selectDriver(driver); setViewDialogOpen(true); }}>
                       <Eye className="w-4 h-4 mr-2" />{t('drivers:actions.view')}
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => { selectDriver(driver); setEditDialogOpen(true); }}>
+                    <PermissionGate permission="driver:update"><Button size="sm" variant="outline" onClick={() => { selectDriver(driver); setEditDialogOpen(true); }}>
                       <Edit className="w-4 h-4 mr-2" />{t('drivers:actions.edit')}
-                    </Button>
-                    <Button size="sm" variant="outline" className="text-destructive hover:bg-destructive/10" onClick={() => openDeleteDialog(driver)}>
+                    </Button></PermissionGate>
+                    <PermissionGate permission="driver:delete"><Button size="sm" variant="outline" className="text-destructive hover:bg-destructive/10" onClick={() => openDeleteDialog(driver)}>
                       <Trash2 className="w-4 h-4" />
-                    </Button>
+                    </Button></PermissionGate>
                   </div>
                 </div>
               </div>
@@ -388,12 +389,12 @@ export default function DriversPageContent() {
                     <DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectDriver(driver); setViewDialogOpen(true); })}>
                       <Eye className="w-4 h-4 mr-2" />{t('drivers:actions.view')}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectDriver(driver); setEditDialogOpen(true); })}>
+                    <PermissionGate permission="driver:update" fullWidth><DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectDriver(driver); setEditDialogOpen(true); })}>
                       <Edit className="w-4 h-4 mr-2" />{t('drivers:actions.edit')}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteDialog(driver)}>
+                    </DropdownMenuItem></PermissionGate>
+                    <PermissionGate permission="driver:delete" fullWidth><DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteDialog(driver)}>
                       <Trash2 className="w-4 h-4 mr-2" />{t('drivers:actions.delete')}
-                    </DropdownMenuItem>
+                    </DropdownMenuItem></PermissionGate>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -483,12 +484,12 @@ export default function DriversPageContent() {
                     <DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectDriver(driver); setViewDialogOpen(true); })}>
                       <Eye className="w-4 h-4 mr-2" /> {t('drivers:actions.view')}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectDriver(driver); setEditDialogOpen(true); })}>
+                    <PermissionGate permission="driver:update" fullWidth><DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectDriver(driver); setEditDialogOpen(true); })}>
                       <Edit className="w-4 h-4 mr-2" /> {t('drivers:actions.edit')}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteDialog(driver)}>
+                    </DropdownMenuItem></PermissionGate>
+                    <PermissionGate permission="driver:delete" fullWidth><DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteDialog(driver)}>
                       <Trash2 className="w-4 h-4 mr-2" /> {t('drivers:actions.delete')}
-                    </DropdownMenuItem>
+                    </DropdownMenuItem></PermissionGate>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

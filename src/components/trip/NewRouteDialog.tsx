@@ -10,6 +10,7 @@ import { Plus, Route as RouteIcon } from 'lucide-react';
 import { createRoute } from '@/helpers/route-helpers';
 import { ICreateRoute } from '@/lib/types/route';
 import { useTranslation } from 'react-i18next';
+import { PermissionGate } from '@/components/PermissionGate';
 
 interface NewRouteDialogProps {
   onRouteCreated?: (route: any) => void;
@@ -81,12 +82,12 @@ export default function NewRouteDialog({ onRouteCreated }: NewRouteDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <PermissionGate permission="route:create"><DialogTrigger asChild>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
           {t('routes:actions.new')}
         </Button>
-      </DialogTrigger>
+      </DialogTrigger></PermissionGate>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

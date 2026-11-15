@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { Calendar, DollarSign, FileText, Wrench, Settings, Flag, Clock, AlertCircle, Play, CheckCircle2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useMaintenances } from '@/contexts/MaintenancesContext';
+import { PermissionGate } from '@/components/PermissionGate';
 
 interface ViewMaintenanceDialogProps {
   open: boolean;
@@ -202,16 +203,16 @@ export default function ViewMaintenanceDialog({ open, onOpenChange, onStart, onC
               <Separator />
               <div className="flex gap-3">
                 {selectedMaintenance.status === 'scheduled' && onStart && (
-                  <Button variant="outline" className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50" onClick={onStart}>
+                  <PermissionGate permission="maintenance:update"><Button variant="outline" className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50" onClick={onStart}>
                     <Play className="w-4 h-4 mr-2" />
                     {t('maintenances:actions.start')}
-                  </Button>
+                  </Button></PermissionGate>
                 )}
                 {onComplete && (
-                  <Button variant="outline" className="flex-1 text-green-600 border-green-200 hover:bg-green-50" onClick={onComplete}>
+                  <PermissionGate permission="maintenance:update"><Button variant="outline" className="flex-1 text-green-600 border-green-200 hover:bg-green-50" onClick={onComplete}>
                     <CheckCircle2 className="w-4 h-4 mr-2" />
                     {t('maintenances:actions.complete')}
-                  </Button>
+                  </Button></PermissionGate>
                 )}
               </div>
             </>

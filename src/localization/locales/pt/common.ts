@@ -90,6 +90,7 @@ export const ptCommon = {
   },
   errors: {
       noPermission: "Não tens permissão para esta acção. Fala com o administrador da organização.",
+      noPermissionShort: "Sem permissão",
       errorLoading: "Erro ao carregar",
       errorLoadingCategories: "Erro ao carregar categorias",
       notFound:{

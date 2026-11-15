@@ -47,6 +47,7 @@ import {
   DropdownMenuTrigger, 
   closeDropdownsAndOpenDialog 
 } from '@/components/ui/dropdown-menu';
+import { PermissionGate } from '@/components/PermissionGate';
 
 type ViewMode = 'compact' | 'normal' | 'cards';
 
@@ -54,6 +55,7 @@ type ViewMode = 'compact' | 'normal' | 'cards';
 export default function VehiclesPageContent() {
   const { t } = useTranslation();
   const { handleError, showSuccess } = useErrorHandler();
+  const canEditVehicleCategory = usePermission('category:update');
   const canLinkGps = usePermission('vehicle:link-device');
 
   const [addGpsDialogOpen, setAddGpsDialogOpen] = useState(false);
@@ -459,17 +461,17 @@ export default function VehiclesPageContent() {
                     <DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectVehicle(vehicle); setViewDialogOpen(true); })}>
                       <Eye className="w-4 h-4 mr-2" /> {t('vehicles:actions.view')}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectVehicle(vehicle); setEditDialogOpen(true); })}>
+                    <PermissionGate permission="vehicle:update" fullWidth><DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectVehicle(vehicle); setEditDialogOpen(true); })}>
                       <Edit className="w-4 h-4 mr-2" /> {t('vehicles:actions.edit')}
-                    </DropdownMenuItem>
+                    </DropdownMenuItem></PermissionGate>
                     {!vehicle.traccar_unique_id && canLinkGps && (
                       <DropdownMenuItem onClick={() => openAddGpsDialog(vehicle.id)}>
                         <Wifi className="w-4 h-4 mr-2" /> {t('vehicles:dialogs.addGps.action')}
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteDialog(vehicle)}>
+                    <PermissionGate permission="vehicle:delete" fullWidth><DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteDialog(vehicle)}>
                       <Trash2 className="w-4 h-4 mr-2" /> {t('vehicles:actions.delete')}
-                    </DropdownMenuItem>
+                    </DropdownMenuItem></PermissionGate>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -522,12 +524,12 @@ export default function VehiclesPageContent() {
                   <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => { selectVehicle(vehicle); setViewDialogOpen(true); }}>
                     <Eye className="w-5 h-5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => { selectVehicle(vehicle); setEditDialogOpen(true); }}>
+                  <PermissionGate permission="vehicle:update"><Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => { selectVehicle(vehicle); setEditDialogOpen(true); }}>
                     <Edit className="w-5 h-5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive hover:bg-destructive/10" onClick={() => { selectVehicle(vehicle); setDeleteDialogOpen(true); }}>
+                  </Button></PermissionGate>
+                  <PermissionGate permission="vehicle:delete"><Button variant="ghost" size="icon" className="h-10 w-10 text-destructive hover:bg-destructive/10" onClick={() => { selectVehicle(vehicle); setDeleteDialogOpen(true); }}>
                     <Trash2 className="w-5 h-5" />
-                  </Button>
+                  </Button></PermissionGate>
                 </div>
               </div>
             </CardContent>
@@ -625,17 +627,17 @@ export default function VehiclesPageContent() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectVehicle(vehicle); setEditDialogOpen(true); })}>
+                    <PermissionGate permission="vehicle:update" fullWidth><DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectVehicle(vehicle); setEditDialogOpen(true); })}>
                       <Edit className="w-4 h-4 mr-2" /> {t('vehicles:actions.edit')}
-                    </DropdownMenuItem>
+                    </DropdownMenuItem></PermissionGate>
                     {!vehicle.traccar_unique_id && canLinkGps && (
                       <DropdownMenuItem onClick={() => openAddGpsDialog(vehicle.id)}>
                         <Wifi className="w-4 h-4 mr-2" /> {t('vehicles:dialogs.addGps.action')}
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteDialog(vehicle)}>
+                    <PermissionGate permission="vehicle:delete" fullWidth><DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteDialog(vehicle)}>
                       <Trash2 className="w-4 h-4 mr-2" /> {t('vehicles:actions.delete')}
-                    </DropdownMenuItem>
+                    </DropdownMenuItem></PermissionGate>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -973,7 +975,7 @@ export default function VehiclesPageContent() {
                   <Card 
                     key={category.id} 
                     className="overflow-hidden group hover:shadow-lg transition-all border-muted/60 bg-card cursor-pointer"
-                    onClick={() => openCategoryEditDialog(category)}
+                    onClick={canEditVehicleCategory ? () => openCategoryEditDialog(category) : undefined}
                   >
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">
@@ -1006,18 +1008,18 @@ export default function VehiclesPageContent() {
                           <span className="text-[11px] font-mono font-bold text-muted-foreground uppercase tracking-wider">{category.color}</span>
                         </div>
                         <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
-                          <Button 
+                          <PermissionGate permission="category:update"><Button 
                             variant="ghost" size="icon" className="h-9 w-9 hover:bg-primary/10 hover:text-primary transition-colors"
                             onClick={(e) => { e.stopPropagation(); openCategoryEditDialog(category); }}
                           >
                             <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button 
+                          </Button></PermissionGate>
+                          <PermissionGate permission="category:delete"><Button 
                             variant="ghost" size="icon" className="h-9 w-9 text-destructive hover:bg-destructive/10"
                             onClick={(e) => { e.stopPropagation(); openCategoryDeleteDialog(category); }}
                           >
                             <Trash2 className="w-4 h-4" />
-                          </Button>
+                          </Button></PermissionGate>
                         </div>
                       </div>
                     </CardContent>

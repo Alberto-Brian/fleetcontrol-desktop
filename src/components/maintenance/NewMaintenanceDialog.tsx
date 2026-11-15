@@ -20,6 +20,7 @@ import { ICreateMaintenance } from '@/lib/types/maintenance';
 import { useMaintenances } from '@/contexts/MaintenancesContext';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { PermissionGate } from '@/components/PermissionGate';
 
 const MAINTENANCE_TYPES = [
   { value: 'preventive', label: 'maintenances:type.preventive.label' },
@@ -180,12 +181,12 @@ export default function NewMaintenanceDialog({ onSuccess }: NewMaintenanceDialog
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <PermissionGate permission="maintenance:create"><DialogTrigger asChild>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
           {t('maintenances:newMaintenance')}
         </Button>
-      </DialogTrigger>
+      </DialogTrigger></PermissionGate>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

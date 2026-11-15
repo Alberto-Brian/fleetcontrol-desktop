@@ -17,6 +17,7 @@ import { getAllVehicles } from '@/helpers/vehicle-helpers';
 import { getAllDrivers } from '@/helpers/driver-helpers';
 import { ICreateExpense } from '@/lib/types/expense';
 import { useExpenses } from '@/contexts/ExpensesContext';
+import { PermissionGate } from '@/components/PermissionGate';
 
 interface NewExpenseDialogProps { onSuccess?: () => void; }
 export default function NewExpenseDialog({ onSuccess }: NewExpenseDialogProps) {
@@ -134,12 +135,12 @@ export default function NewExpenseDialog({ onSuccess }: NewExpenseDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <PermissionGate permission="expense:create"><DialogTrigger asChild>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
           {t('expenses:newExpense')}
         </Button>
-      </DialogTrigger>
+      </DialogTrigger></PermissionGate>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

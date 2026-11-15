@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, User, CreditCard, Phone, Mail } from 'lucide-react';
 import { createDriver as createDriverHelper } from '@/helpers/driver-helpers';
 import { useDrivers } from '@/contexts/DriversContext';
+import { PermissionGate } from '@/components/PermissionGate';
 
 interface NewDriverDialogProps {
   onSuccess?: () => void;
@@ -66,12 +67,12 @@ export default function NewDriverDialog({ onSuccess }: NewDriverDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <PermissionGate permission="driver:create"><DialogTrigger asChild>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
           {t('drivers:newDriver')}
         </Button>
-      </DialogTrigger>
+      </DialogTrigger></PermissionGate>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{t('drivers:dialogs.new.title')}</DialogTitle>

@@ -14,6 +14,7 @@ import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { createVehicleCategory } from '@/helpers/vehicle-category-helpers';
 import { ICreateVehicleCategory } from '@/lib/types/vehicle-category';
 import { useVehicles } from '@/contexts/VehiclesContext';
+import { PermissionGate } from '@/components/PermissionGate';
 
 interface NewVehicleCategoryDialogProps { onSuccess?: () => void; }
 export default function NewVehicleCategoryDialog({ onSuccess }: NewVehicleCategoryDialogProps) {
@@ -71,12 +72,12 @@ export default function NewVehicleCategoryDialog({ onSuccess }: NewVehicleCatego
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <PermissionGate permission="category:create"><DialogTrigger asChild>
         <Button id="new-category-trigger">
           <Plus className="w-4 h-4 mr-2" />
           {t('vehicles:categories.new')}
         </Button>
-      </DialogTrigger>
+      </DialogTrigger></PermissionGate>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

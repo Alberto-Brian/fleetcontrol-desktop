@@ -27,6 +27,7 @@ import { getActiveTrips } from '@/helpers/trip-helpers';
 import { ICreateRefueling } from '@/lib/types/refueling';
 import type { FuelType } from '@/lib/db/schemas/refuelings';
 import { useRefuelings } from '@/contexts/RefuelingsContext';
+import { PermissionGate } from '@/components/PermissionGate';
 
 const FUEL_TYPES = [
   { value: 'gasoline', label: 'refuelings:fuelTypes.gasoline', icon: '⛽' },
@@ -174,12 +175,12 @@ export default function NewRefuelingDialog({ onSuccess }: NewRefuelingDialogProp
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <PermissionGate permission="fuel:create"><DialogTrigger asChild>
         <Button className="gap-2">
           <Plus className="w-4 h-4" />
           {t('refuelings:newRefueling')}
         </Button>
-      </DialogTrigger>
+      </DialogTrigger></PermissionGate>
 
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>

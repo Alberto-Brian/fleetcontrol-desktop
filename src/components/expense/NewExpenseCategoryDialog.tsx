@@ -15,6 +15,7 @@ import { createExpenseCategory } from '@/helpers/expense-category-helpers';
 import { ICreateExpenseCategory } from '@/lib/types/expense-category';
 import { useExpenses } from '@/contexts/ExpensesContext';
 import { RESTORE_EXPENSE_CATEGORY } from '@/helpers/ipc/db/expense_categories/expense-categories-channels';
+import { PermissionGate } from '@/components/PermissionGate';
 
 const CATEGORY_TYPES = [
   { value: 'operational', label: 'expenses:categoryTypes.operational' },
@@ -98,12 +99,12 @@ export default function NewExpenseCategoryDialog({ onSuccess }: NewExpenseCatego
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <PermissionGate permission="category:create"><DialogTrigger asChild>
         <Button id="new-category-trigger">
           <Plus className="w-4 h-4 mr-2" />
           {t('expenses:actions.newCategory')}
         </Button>
-      </DialogTrigger>
+      </DialogTrigger></PermissionGate>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

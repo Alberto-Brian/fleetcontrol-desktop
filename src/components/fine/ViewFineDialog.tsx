@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useFines } from '@/contexts/FinesContext';
 import { isOverdue, getDaysOverdue, getDaysUntilDue } from '@/helpers/fine-helpers';
+import { PermissionGate } from '@/components/PermissionGate';
 
 interface ViewFineDialogProps {
   open: boolean;
@@ -276,22 +277,22 @@ export default function ViewFineDialog({ open, onOpenChange, onEdit, onMarkAsPai
             {selectedFine.status === 'pending' && (
               <>
                 {onEdit && (
-                  <Button variant="outline" onClick={onEdit}>
+                  <PermissionGate permission="fine:update"><Button variant="outline" onClick={onEdit}>
                     <Edit className="w-4 h-4 mr-2" />
                     {t('fines:actions.edit')}
-                  </Button>
+                  </Button></PermissionGate>
                 )}
                 {onMarkAsPaid && (
-                  <Button className="bg-green-600 hover:bg-green-700" onClick={onMarkAsPaid}>
+                  <PermissionGate permission="fine:update"><Button className="bg-green-600 hover:bg-green-700" onClick={onMarkAsPaid}>
                     <CheckCircle2 className="w-4 h-4 mr-2" />
                     {t('fines:actions.markAsPaid')}
-                  </Button>
+                  </Button></PermissionGate>
                 )}
                 {onContest && (
-                  <Button variant="outline" onClick={onContest}>
+                  <PermissionGate permission="fine:update"><Button variant="outline" onClick={onContest}>
                     <Scale className="w-4 h-4 mr-2" />
                     {t('fines:actions.contest')}
-                  </Button>
+                  </Button></PermissionGate>
                 )}
               </>
             )}

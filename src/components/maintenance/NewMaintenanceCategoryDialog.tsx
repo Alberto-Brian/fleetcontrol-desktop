@@ -15,6 +15,7 @@ import { createMaintenanceCategory } from '@/helpers/maintenance-category-helper
 import { ICreateMaintenanceCategory } from '@/lib/types/maintenance_category';
 import { useMaintenances } from '@/contexts/MaintenancesContext';
 import { RESTORE_MAINTENANCE_CATEGORY } from '@/helpers/ipc/db/maintenance_categories/maintenance-categories-channels';
+import { PermissionGate } from '@/components/PermissionGate';
 
 const CATEGORY_TYPES = [
   { value: 'preventive', label: 'maintenances:type.preventive.label' },
@@ -96,12 +97,12 @@ export default function NewMaintenanceCategoryDialog({ onSuccess }: NewMaintenan
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <PermissionGate permission="maintenance_category:create"><DialogTrigger asChild>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
           {t('maintenances:categories.newCategory')}
         </Button>
-      </DialogTrigger>
+      </DialogTrigger></PermissionGate>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

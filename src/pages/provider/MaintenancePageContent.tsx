@@ -45,6 +45,8 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { PermissionGate } from '@/components/PermissionGate';
+import { usePermission } from '@/hooks/usePermission';
 
 function fmt(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
@@ -57,6 +59,8 @@ type ViewMode = 'compact' | 'normal' | 'cards';
 export function MaintenancePageContent() {
   const { t } = useTranslation();
   const { handleError, showSuccess } = useErrorHandler();
+  const canEditMaintenanceCategory = usePermission('maintenance_category:update');
+  const canEditWorkshop = usePermission('workshop:update');
 
   const {
     state: { maintenances, categories, workshops, selectedMaintenance, selectedCategory, selectedWorkshop,
@@ -339,17 +343,17 @@ export function MaintenancePageContent() {
                       <Eye className="w-4 h-4 mr-2" />
                       {t('common:actions.view')}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => { selectMaintenance(m); setEditDialogOpen(true); }}>
+                    <PermissionGate permission="maintenance:update" fullWidth><DropdownMenuItem onClick={() => { selectMaintenance(m); setEditDialogOpen(true); }}>
                       <Edit className="w-4 h-4 mr-2" />
                       {t('common:actions.edit')}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
+                    </DropdownMenuItem></PermissionGate>
+                    <PermissionGate permission="maintenance:delete" fullWidth><DropdownMenuItem 
                       className="text-destructive focus:text-destructive"
                       onClick={() => { selectMaintenance(m); setDeleteDialogOpen(true); }}
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
                       {t('common:actions.delete')}
-                    </DropdownMenuItem>
+                    </DropdownMenuItem></PermissionGate>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -414,17 +418,17 @@ export function MaintenancePageContent() {
                         <Eye className="w-4 h-4 mr-2" />
                         {t('common:actions.view')}
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => { selectMaintenance(maintenance); setEditDialogOpen(true); }}>
+                      <PermissionGate permission="maintenance:update" fullWidth><DropdownMenuItem onClick={() => { selectMaintenance(maintenance); setEditDialogOpen(true); }}>
                         <Edit className="w-4 h-4 mr-2" />
                         {t('common:actions.edit')}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
+                      </DropdownMenuItem></PermissionGate>
+                      <PermissionGate permission="maintenance:delete" fullWidth><DropdownMenuItem 
                         className="text-destructive focus:text-destructive"
                         onClick={() => { selectMaintenance(maintenance); setDeleteDialogOpen(true); }}
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
                         {t('common:actions.delete')}
-                      </DropdownMenuItem>
+                      </DropdownMenuItem></PermissionGate>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -485,8 +489,8 @@ export function MaintenancePageContent() {
                   {maintenance.status === maintenanceStatus.IN_PROGRESS && (
                     <Button variant="default" size="sm" className="flex-1 h-9 text-xs font-bold bg-green-600 hover:bg-green-700" onClick={(e) => { e.stopPropagation(); selectMaintenance(maintenance); }}><CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />{t('maintenances:actions.complete')}</Button>
                   )}
-                  <Button variant="outline" size="sm" className="h-9 px-2" onClick={(e) => { e.stopPropagation(); selectMaintenance(maintenance); setEditDialogOpen(true); }} title={t('common:actions.edit')}><Edit className="w-3.5 h-3.5" /></Button>
-                  <Button variant="outline" size="sm" className="h-9 px-2 text-destructive hover:bg-destructive/10" onClick={(e) => { e.stopPropagation(); selectMaintenance(maintenance); setDeleteDialogOpen(true); }} title={t('common:actions.delete')}><Trash2 className="w-3.5 h-3.5" /></Button>
+                  <PermissionGate permission="maintenance:update"><Button variant="outline" size="sm" className="h-9 px-2" onClick={(e) => { e.stopPropagation(); selectMaintenance(maintenance); setEditDialogOpen(true); }} title={t('common:actions.edit')}><Edit className="w-3.5 h-3.5" /></Button></PermissionGate>
+                  <PermissionGate permission="maintenance:delete"><Button variant="outline" size="sm" className="h-9 px-2 text-destructive hover:bg-destructive/10" onClick={(e) => { e.stopPropagation(); selectMaintenance(maintenance); setDeleteDialogOpen(true); }} title={t('common:actions.delete')}><Trash2 className="w-3.5 h-3.5" /></Button></PermissionGate>
                 </div>
               </div>
             </CardContent>
@@ -801,7 +805,7 @@ export function MaintenancePageContent() {
             ) : (
               <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in duration-300">
                 {filteredCategories.map((category) => (
-                  <Card key={category.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 bg-card border-muted/60 cursor-pointer" onClick={() => { selectCategory(category); setEditCategoryDialogOpen(true); }}>
+                  <Card key={category.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 bg-card border-muted/60 cursor-pointer" onClick={canEditMaintenanceCategory ? () => { selectCategory(category); setEditCategoryDialogOpen(true); } : undefined}>
                     <CardHeader className="pb-3 pt-5 px-5">
                       <div className="flex justify-between items-start mb-3">
                         <div className="p-2.5 rounded-xl transition-colors" style={{ backgroundColor: `${category.color}20` }}><Tag className="w-5 h-5" style={{ color: category.color }} /></div>
@@ -813,8 +817,8 @@ export function MaintenancePageContent() {
                     <CardContent className="flex-1 flex flex-col gap-3 p-5 pt-0">
                       <div className="flex items-center gap-2 mb-2"><div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: category.color }} /><span className="text-[11px] font-mono font-bold text-muted-foreground uppercase tracking-wider">{category.color}</span></div>
                       <div className="mt-auto pt-4 border-t border-muted/50 flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold bg-background hover:bg-muted" onClick={(e) => { e.stopPropagation(); selectCategory(category); setEditCategoryDialogOpen(true); }}><Edit className="w-3.5 h-3.5 mr-1.5" />{t('common:actions.edit')}</Button>
-                        <Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive bg-background" onClick={(e) => { e.stopPropagation(); selectCategory(category); setCategoryDeleteDialogOpen(true); }}><Trash2 className="w-3.5 h-3.5 mr-1.5" />{t('common:actions.delete')}</Button>
+                        <PermissionGate permission="maintenance_category:update"><Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold bg-background hover:bg-muted" onClick={(e) => { e.stopPropagation(); selectCategory(category); setEditCategoryDialogOpen(true); }}><Edit className="w-3.5 h-3.5 mr-1.5" />{t('common:actions.edit')}</Button></PermissionGate>
+                        <PermissionGate permission="maintenance_category:delete"><Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive bg-background" onClick={(e) => { e.stopPropagation(); selectCategory(category); setCategoryDeleteDialogOpen(true); }}><Trash2 className="w-3.5 h-3.5 mr-1.5" />{t('common:actions.delete')}</Button></PermissionGate>
                       </div>
                     </CardContent>
                   </Card>
@@ -858,7 +862,7 @@ export function MaintenancePageContent() {
             ) : (
               <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in duration-300">
                 {filteredWorkshops.map((workshop) => (
-                  <Card key={workshop.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 bg-card border-muted/60 cursor-pointer" onClick={() => { selectWorkshop(workshop); setEditWorkshopDialogOpen(true); }}>
+                  <Card key={workshop.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 bg-card border-muted/60 cursor-pointer" onClick={canEditWorkshop ? () => { selectWorkshop(workshop); setEditWorkshopDialogOpen(true); } : undefined}>
                     <CardHeader className="pb-3 pt-5 px-5">
                       <div className="flex justify-between items-start mb-3">
                         <div className={cn('p-2.5 rounded-xl transition-colors', workshop.is_active ? 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white' : 'bg-muted text-muted-foreground')}><Building2 className="w-5 h-5" /></div>
@@ -876,8 +880,8 @@ export function MaintenancePageContent() {
                         {workshop.city  && <div className="flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="w-4 h-4 shrink-0" /><span className="truncate">{workshop.city}</span></div>}
                       </div>
                       <div className="mt-auto pt-4 border-t border-muted/50 flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold bg-background hover:bg-muted" onClick={(e) => { e.stopPropagation(); selectWorkshop(workshop); setEditWorkshopDialogOpen(true); }}><Edit className="w-3.5 h-3.5 mr-1.5" />{t('common:actions.edit')}</Button>
-                        <Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive bg-background" onClick={(e) => { e.stopPropagation(); selectWorkshop(workshop); setWorkshopDeleteDialogOpen(true); }}><Trash2 className="w-3.5 h-3.5 mr-1.5" />{t('common:actions.delete')}</Button>
+                        <PermissionGate permission="workshop:update"><Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold bg-background hover:bg-muted" onClick={(e) => { e.stopPropagation(); selectWorkshop(workshop); setEditWorkshopDialogOpen(true); }}><Edit className="w-3.5 h-3.5 mr-1.5" />{t('common:actions.edit')}</Button></PermissionGate>
+                        <PermissionGate permission="workshop:delete"><Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive bg-background" onClick={(e) => { e.stopPropagation(); selectWorkshop(workshop); setWorkshopDeleteDialogOpen(true); }}><Trash2 className="w-3.5 h-3.5 mr-1.5" />{t('common:actions.delete')}</Button></PermissionGate>
                       </div>
                     </CardContent>
                   </Card>

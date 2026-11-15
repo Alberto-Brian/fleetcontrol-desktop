@@ -33,6 +33,7 @@ import { IMaintenance } from '@/lib/types/maintenance';
 import UpdateMileageDialog from './UpdateMileageDialog';
 import ChangeStatusDialog from './ChangeStatusDialog';
 import EditVehicleDialog from './EditVehicleDialog';
+import { PermissionGate } from '@/components/PermissionGate';
 
 interface ViewVehicleDialogProps {
   open: boolean;
@@ -297,7 +298,7 @@ export default function ViewVehicleDialog({ open, onOpenChange, onRegisterGps }:
               </p>
               <div className="grid grid-cols-2 gap-3">
                 {/* Atualizar Km */}
-                <button
+                <PermissionGate permission="vehicle:update"><button
                   onClick={() => setMileageDialogOpen(true)}
                   className="flex items-center gap-3 p-4 rounded-xl border-2 border-border bg-card hover:border-emerald-500/50 hover:bg-emerald-50/50 transition-all text-left group"
                 >
@@ -308,10 +309,10 @@ export default function ViewVehicleDialog({ open, onOpenChange, onRegisterGps }:
                     <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t('vehicles:fields.mileage')}</p>
                     <p className="font-bold text-sm mt-0.5">{t('vehicles:actions.updateMileage')}</p>
                   </div>
-                </button>
+                </button></PermissionGate>
 
                 {/* Alterar Status */}
-                <button
+                <PermissionGate permission="vehicle:update"><button
                   onClick={() => setStatusDialogOpen(true)}
                   className="flex items-center gap-3 p-4 rounded-xl border-2 border-border bg-card hover:border-blue-500/50 hover:bg-blue-50/50 transition-all text-left group"
                   disabled={selectedVehicle.status === 'in_use'}
@@ -325,10 +326,10 @@ export default function ViewVehicleDialog({ open, onOpenChange, onRegisterGps }:
                       {selectedVehicle.status === 'in_use' ? t('vehicles:dialogs.status.inUseBlocked') : t('vehicles:actions.changeStatus')}
                     </p>
                   </div>
-                </button>
+                </button></PermissionGate>
 
                 {/* Editar Dados */}
-                <button
+                <PermissionGate permission="vehicle:update"><button
                   onClick={() => setEditDialogOpen(true)}
                   className="flex items-center gap-3 p-4 rounded-xl border-2 border-border bg-card hover:border-purple-500/50 hover:bg-purple-50/50 transition-all text-left group"
                 >
@@ -339,7 +340,7 @@ export default function ViewVehicleDialog({ open, onOpenChange, onRegisterGps }:
                     <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t('vehicles:dialogs.view.vehicleData')}</p>
                     <p className="font-bold text-sm mt-0.5">{t('vehicles:actions.editData')}</p>
                   </div>
-                </button>
+                </button></PermissionGate>
 
                 {/* Ver Categoria */}
                 <div className="flex items-center gap-3 p-4 rounded-xl border-2 border-border bg-muted/30">

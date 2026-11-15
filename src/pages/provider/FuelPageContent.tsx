@@ -43,6 +43,8 @@ import {
 import { SearchableSelect, type SearchableSelectOption } from '@/components/ui/searchable-select';
 import { getAllVehicles } from '@/helpers/vehicle-helpers';
 import { readPersistedFilter, writePersistedFilter } from '@/lib/filter-persistence';
+import { PermissionGate } from '@/components/PermissionGate';
+import { usePermission } from '@/hooks/usePermission';
 
 function fmt(n: number, suffix = '') {
   const abs = Math.abs(n);
@@ -57,6 +59,7 @@ type ViewMode = 'compact' | 'normal' | 'cards';
 export default function FuelPageContent() {
   const { t } = useTranslation();
   const { handleError, showSuccess } = useErrorHandler();
+  const canEditFuelStation = usePermission('fuel_station:update');
 
   const {
     state: {
@@ -285,16 +288,16 @@ export default function FuelPageContent() {
                     <DropdownMenuItem onClick={() => openView(r)}>
                       <Eye className="w-4 h-4 mr-2" />{t('common:actions.view')}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => openEdit(r)}>
+                    <PermissionGate permission="fuel:update" fullWidth><DropdownMenuItem onClick={() => openEdit(r)}>
                       <Edit className="w-4 h-4 mr-2" />{t('common:actions.edit')}
-                    </DropdownMenuItem>
+                    </DropdownMenuItem></PermissionGate>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
+                    <PermissionGate permission="fuel:delete" fullWidth><DropdownMenuItem
                       className="text-destructive focus:text-destructive"
                       onClick={() => openDelete(r)}
                     >
                       <Trash2 className="w-4 h-4 mr-2" />{t('common:actions.delete')}
-                    </DropdownMenuItem>
+                    </DropdownMenuItem></PermissionGate>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -339,15 +342,15 @@ export default function FuelPageContent() {
                     <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => openView(r)} title={t('common:actions.view')}>
                       <Eye className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => openEdit(r)} title={t('common:actions.edit')}>
+                    <PermissionGate permission="fuel:update"><Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => openEdit(r)} title={t('common:actions.edit')}>
                       <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
+                    </Button></PermissionGate>
+                    <PermissionGate permission="fuel:delete"><Button
                       variant="ghost" size="icon" className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10"
                       onClick={() => openDelete(r)} title={t('common:actions.delete')}
                     >
                       <Trash2 className="w-4 h-4" />
-                    </Button>
+                    </Button></PermissionGate>
                   </div>
                 </div>
               </div>
@@ -396,16 +399,16 @@ export default function FuelPageContent() {
                     <DropdownMenuItem onClick={e => { e.stopPropagation(); openView(r); }}>
                       <Eye className="w-4 h-4 mr-2" />{t('common:actions.view')}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={e => { e.stopPropagation(); openEdit(r); }}>
+                    <PermissionGate permission="fuel:update" fullWidth><DropdownMenuItem onClick={e => { e.stopPropagation(); openEdit(r); }}>
                       <Edit className="w-4 h-4 mr-2" />{t('common:actions.edit')}
-                    </DropdownMenuItem>
+                    </DropdownMenuItem></PermissionGate>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
+                    <PermissionGate permission="fuel:delete" fullWidth><DropdownMenuItem
                       className="text-destructive focus:text-destructive"
                       onClick={e => { e.stopPropagation(); openDelete(r); }}
                     >
                       <Trash2 className="w-4 h-4 mr-2" />{t('common:actions.delete')}
-                    </DropdownMenuItem>
+                    </DropdownMenuItem></PermissionGate>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -450,7 +453,7 @@ export default function FuelPageContent() {
                   >
                     <Eye className="w-4 h-4 mr-2" />{t('refuelings:actions.view')}
                   </Button>
-                  <Button
+                  <PermissionGate permission="fuel:update"><Button
                     variant="outline"
                     size="icon"
                     className="h-9 w-9 shrink-0"
@@ -458,7 +461,7 @@ export default function FuelPageContent() {
                     title={t('common:actions.edit')}
                   >
                     <Edit className="w-4 h-4" />
-                  </Button>
+                  </Button></PermissionGate>
                 </div>
               </div>
             </CardContent>
@@ -733,7 +736,7 @@ export default function FuelPageContent() {
                   <Card
                     key={station.id}
                     className="overflow-hidden group hover:shadow-lg transition-all duration-300 bg-card border-muted/60 cursor-pointer"
-                    onClick={() => { selectFuelStation(station); setEditStationDialogOpen(true); }}
+                    onClick={canEditFuelStation ? () => { selectFuelStation(station); setEditStationDialogOpen(true); } : undefined}
                   >
                     <CardHeader className="pb-3 pt-5 px-5">
                       <div className="flex justify-between items-start mb-3">
@@ -757,18 +760,18 @@ export default function FuelPageContent() {
                         {(station as any).email && <div className="flex items-center gap-2 text-sm text-muted-foreground"><Mail className="w-4 h-4 shrink-0" /><span className="truncate">{(station as any).email}</span></div>}
                       </div>
                       <div className="mt-auto pt-4 border-t border-muted/50 flex gap-2">
-                        <Button
+                        <PermissionGate permission="fuel_station:update"><Button
                           variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold bg-background hover:bg-muted"
                           onClick={e => { e.stopPropagation(); selectFuelStation(station); setEditStationDialogOpen(true); }}
                         >
                           <Edit className="w-3.5 h-3.5 mr-1.5" />{t('common:actions.edit')}
-                        </Button>
-                        <Button
+                        </Button></PermissionGate>
+                        <PermissionGate permission="fuel_station:delete"><Button
                           variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive bg-background"
                           onClick={e => { e.stopPropagation(); selectFuelStation(station); setStationDeleteDialogOpen(true); }}
                         >
                           <Trash2 className="w-3.5 h-3.5 mr-1.5" />{t('common:actions.delete')}
-                        </Button>
+                        </Button></PermissionGate>
                       </div>
                     </CardContent>
                   </Card>

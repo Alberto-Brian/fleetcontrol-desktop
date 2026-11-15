@@ -45,6 +45,7 @@ import {
   closeDropdownsAndOpenDialog
 } from '@/components/ui/dropdown-menu';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { PermissionGate } from '@/components/PermissionGate';
 
 function fmt(n: number, suffix = '') {
   const abs = Math.abs(n);
@@ -308,12 +309,12 @@ export default function TripsPageContent() {
                       </DropdownMenuItem>
                       {trip.status === 'in_progress' && (
                         <>
-                          <DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectTrip(trip); setCompleteDialogOpen(true); })}>
+                          <PermissionGate permission="trip:update" fullWidth><DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectTrip(trip); setCompleteDialogOpen(true); })}>
                             <Flag className="w-4 h-4 mr-2" /> {t('trips:actions.complete')}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => closeDropdownsAndOpenDialog(() => { selectTrip(trip); setCancelDialogOpen(true); })}>
+                          </DropdownMenuItem></PermissionGate>
+                          <PermissionGate permission="trip:update" fullWidth><DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => closeDropdownsAndOpenDialog(() => { selectTrip(trip); setCancelDialogOpen(true); })}>
                             <XCircle className="w-4 h-4 mr-2" /> {t('trips:actions.cancel')}
-                          </DropdownMenuItem>
+                          </DropdownMenuItem></PermissionGate>
                         </>
                       )}
                     </DropdownMenuContent>
@@ -388,12 +389,12 @@ export default function TripsPageContent() {
                       </Button>
                       {isInProgress && (
                         <>
-                          <Button size="sm" variant="outline" className="text-emerald-600 border-emerald-200 hover:bg-emerald-50" onClick={() => closeDropdownsAndOpenDialog(() => { selectTrip(trip); setCompleteDialogOpen(true); })}>
+                          <PermissionGate permission="trip:update"><Button size="sm" variant="outline" className="text-emerald-600 border-emerald-200 hover:bg-emerald-50" onClick={() => closeDropdownsAndOpenDialog(() => { selectTrip(trip); setCompleteDialogOpen(true); })}>
                             <Flag className="w-4 h-4 mr-2" />{t('trips:actions.complete')}
-                          </Button>
-                          <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => closeDropdownsAndOpenDialog(() => { selectTrip(trip); setCancelDialogOpen(true); })}>
+                          </Button></PermissionGate>
+                          <PermissionGate permission="trip:update"><Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => closeDropdownsAndOpenDialog(() => { selectTrip(trip); setCancelDialogOpen(true); })}>
                             <XCircle className="w-4 h-4 mr-2" />{t('trips:actions.cancel')}
-                          </Button>
+                          </Button></PermissionGate>
                         </>
                       )}
                     </div>
@@ -508,12 +509,12 @@ export default function TripsPageContent() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectTrip(trip); setCompleteDialogOpen(true); })}>
+                          <PermissionGate permission="trip:update" fullWidth><DropdownMenuItem onClick={() => closeDropdownsAndOpenDialog(() => { selectTrip(trip); setCompleteDialogOpen(true); })}>
                             <Flag className="w-4 h-4 mr-2 text-emerald-600" />{t('trips:actions.complete')}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => closeDropdownsAndOpenDialog(() => { selectTrip(trip); setCancelDialogOpen(true); })}>
+                          </DropdownMenuItem></PermissionGate>
+                          <PermissionGate permission="trip:update" fullWidth><DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => closeDropdownsAndOpenDialog(() => { selectTrip(trip); setCancelDialogOpen(true); })}>
                             <XCircle className="w-4 h-4 mr-2" />{t('trips:actions.cancel')}
-                          </DropdownMenuItem>
+                          </DropdownMenuItem></PermissionGate>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     ) : (
@@ -586,14 +587,14 @@ export default function TripsPageContent() {
                   )}
                 </div>
                 <div className="mt-auto pt-4 border-t border-muted/50 flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold bg-background hover:bg-muted"
+                  <PermissionGate permission="route:update"><Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold bg-background hover:bg-muted"
                     onClick={() => { setSelectedRoute(route); setEditRouteDialogOpen(true); }}>
                     <Edit className="w-3.5 h-3.5 mr-1.5" />{t('common:actions.edit')}
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive bg-background"
+                  </Button></PermissionGate>
+                  <PermissionGate permission="route:delete"><Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive bg-background"
                     onClick={() => { setSelectedRoute(route); setDeleteRouteDialogOpen(true); }}>
                     <Trash2 className="w-3.5 h-3.5 mr-1.5" />{t('common:actions.delete')}
-                  </Button>
+                  </Button></PermissionGate>
                 </div>
               </CardContent>
             </Card>

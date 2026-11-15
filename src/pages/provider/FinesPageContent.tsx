@@ -31,6 +31,7 @@ import EditFineDialog from '@/components/fine/EditFineDialog';
 import MarkAsPaidDialog from '@/components/fine/MarkAsPaidDialog';
 import ContestFineDialog from '@/components/fine/ContestFineDialog';
 import ConfirmDeleteDialog from '@/components/ConfirmDeleteDialog';
+import { PermissionGate } from '@/components/PermissionGate';
 
 type ViewMode = 'compact' | 'normal' | 'cards';
 
@@ -181,17 +182,17 @@ export default function FinesPageContent() {
                     </DropdownMenuItem>
                     {fine.status === 'pending' && (
                       <>
-                        <DropdownMenuItem className="text-emerald-600 focus:text-emerald-600" onClick={() => { selectFine(fine); setMarkAsPaidDialogOpen(true); }}>
+                        <PermissionGate permission="fine:update" fullWidth><DropdownMenuItem className="text-emerald-600 focus:text-emerald-600" onClick={() => { selectFine(fine); setMarkAsPaidDialogOpen(true); }}>
                           <CheckCircle2 className="w-4 h-4 mr-2" />{t('fines:actions.markAsPaid')}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { selectFine(fine); setEditDialogOpen(true); }}>
+                        </DropdownMenuItem></PermissionGate>
+                        <PermissionGate permission="fine:update" fullWidth><DropdownMenuItem onClick={() => { selectFine(fine); setEditDialogOpen(true); }}>
                           <Edit className="w-4 h-4 mr-2" />{t('fines:actions.edit')}
-                        </DropdownMenuItem>
+                        </DropdownMenuItem></PermissionGate>
                       </>
                     )}
-                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => { selectFine(fine); setDeleteDialogOpen(true); }}>
+                    <PermissionGate permission="fine:delete" fullWidth><DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => { selectFine(fine); setDeleteDialogOpen(true); }}>
                       <Trash2 className="w-4 h-4 mr-2" />{t('fines:actions.delete')}
-                    </DropdownMenuItem>
+                    </DropdownMenuItem></PermissionGate>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -239,11 +240,11 @@ export default function FinesPageContent() {
                   </div>
                   {fine.status === 'pending' && (
                     <>
-                      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); selectFine(fine); setMarkAsPaidDialogOpen(true); }}><CheckCircle2 className="w-5 h-5 text-green-600" /></Button>
-                      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); selectFine(fine); setEditDialogOpen(true); }}><Edit className="w-5 h-5" /></Button>
+                      <PermissionGate permission="fine:update"><Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); selectFine(fine); setMarkAsPaidDialogOpen(true); }}><CheckCircle2 className="w-5 h-5 text-green-600" /></Button></PermissionGate>
+                      <PermissionGate permission="fine:update"><Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); selectFine(fine); setEditDialogOpen(true); }}><Edit className="w-5 h-5" /></Button></PermissionGate>
                     </>
                   )}
-                  <Button variant="ghost" size="icon" className="text-destructive" onClick={(e) => { e.stopPropagation(); selectFine(fine); setDeleteDialogOpen(true); }}><Trash2 className="w-5 h-5" /></Button>
+                  <PermissionGate permission="fine:delete"><Button variant="ghost" size="icon" className="text-destructive" onClick={(e) => { e.stopPropagation(); selectFine(fine); setDeleteDialogOpen(true); }}><Trash2 className="w-5 h-5" /></Button></PermissionGate>
                 </div>
               </div>
             </CardContent>
@@ -307,12 +308,12 @@ export default function FinesPageContent() {
                 <div className="flex gap-2">
                   {fine.status === 'pending' && (
                     <>
-                      <Button size="sm" className="flex-1 h-9 bg-green-600 hover:bg-green-700 text-xs font-bold" onClick={() => { selectFine(fine); setMarkAsPaidDialogOpen(true); }}>
+                      <PermissionGate permission="fine:update"><Button size="sm" className="flex-1 h-9 bg-green-600 hover:bg-green-700 text-xs font-bold" onClick={() => { selectFine(fine); setMarkAsPaidDialogOpen(true); }}>
                         <CheckCircle2 className="w-3.5 h-3.5 mr-1" />{t('fines:actions.pay')}
-                      </Button>
-                      <Button size="sm" variant="outline" className="flex-1 h-9 text-xs font-bold" onClick={() => { selectFine(fine); setContestDialogOpen(true); }}>
+                      </Button></PermissionGate>
+                      <PermissionGate permission="fine:update"><Button size="sm" variant="outline" className="flex-1 h-9 text-xs font-bold" onClick={() => { selectFine(fine); setContestDialogOpen(true); }}>
                         <Scale className="w-3.5 h-3.5 mr-1" />{t('fines:actions.contest')}
-                      </Button>
+                      </Button></PermissionGate>
                     </>
                   )}
                   {fine.status !== 'pending' && (

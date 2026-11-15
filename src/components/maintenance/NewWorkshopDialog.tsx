@@ -14,6 +14,7 @@ import { createWorkshop } from '@/helpers/workshop-helpers';
 import { ICreateWorkshop } from '@/lib/types/workshop';
 import { useMaintenances } from '@/contexts/MaintenancesContext';
 import { RESTORE_WORKSHOP } from '@/helpers/ipc/db/workshops/workshops-channels';
+import { PermissionGate } from '@/components/PermissionGate';
 
 interface NewWorkshopDialogProps { onSuccess?: () => void; }
 export default function NewWorkshopDialog({ onSuccess }: NewWorkshopDialogProps) {
@@ -88,12 +89,12 @@ export default function NewWorkshopDialog({ onSuccess }: NewWorkshopDialogProps)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <PermissionGate permission="workshop:create"><DialogTrigger asChild>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
           {t('maintenances:workshops.newWorkshop')}
         </Button>
-      </DialogTrigger>
+      </DialogTrigger></PermissionGate>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

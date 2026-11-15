@@ -20,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { useTrips } from '@/contexts/TripsContext';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { PermissionGate } from '@/components/PermissionGate';
 
 export default function StartTripDialog() {
   const { t } = useTranslation();
@@ -162,12 +163,12 @@ export default function StartTripDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <PermissionGate permission="trip:create"><DialogTrigger asChild>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
           {t('trips:newTrip')}
         </Button>
-      </DialogTrigger>
+      </DialogTrigger></PermissionGate>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">{t('trips:dialogs.start.title')}</DialogTitle>

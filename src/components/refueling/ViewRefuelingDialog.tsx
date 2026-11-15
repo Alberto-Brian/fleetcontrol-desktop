@@ -23,6 +23,7 @@ import {
 import { deleteRefueling } from '@/helpers/refueling-helpers';
 import { useRefuelings } from '@/contexts/RefuelingsContext';
 import EditRefuelingDialog from '@/components/refueling/EditRefuelingDialog';
+import { PermissionGate } from '@/components/PermissionGate';
 
 interface ViewRefuelingDialogProps {
   open: boolean;
@@ -140,7 +141,7 @@ export default function ViewRefuelingDialog({ open, onOpenChange }: ViewRefuelin
                   <Pencil className="w-3.5 h-3.5" />
                   {t('common:actions.edit')}
                 </Button>
-                <Button
+                <PermissionGate permission="fuel:delete"><Button
                   variant="ghost"
                   size="sm"
                   className="gap-1.5 h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
@@ -148,7 +149,7 @@ export default function ViewRefuelingDialog({ open, onOpenChange }: ViewRefuelin
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   {t('common:actions.delete')}
-                </Button> */}
+                </Button></PermissionGate> */}
               </div>
             </div>
           </DialogHeader>
@@ -271,14 +272,14 @@ export default function ViewRefuelingDialog({ open, onOpenChange }: ViewRefuelin
             {/* ── Rodapé: botões de acção ─────────────────────────────────── */}
             <Separator />
             <div className="flex justify-end gap-3 pt-1">
-              <Button
+              <PermissionGate permission="fuel:delete"><Button
                 variant="outline"
                 className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
                 onClick={() => setConfirmDelete(true)}
               >
                 <Trash2 className="w-4 h-4" />
                 {t('common:actions.delete')}
-              </Button>
+              </Button></PermissionGate>
               <Button
                 className="gap-2"
                 onClick={() => { onOpenChange(false); setTimeout(() => setEditOpen(true), 100); }}

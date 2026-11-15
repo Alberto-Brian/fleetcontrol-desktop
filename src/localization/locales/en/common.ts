@@ -92,6 +92,7 @@ export const enCommon = {
     },
     errors: {
         noPermission: "You do not have permission for this action. Contact your organization administrator.",
+        noPermissionShort: "No permission",
         errorLoading: "Error loading",
         errorLoadingCategories: "Error loading categories",
         notFound:{

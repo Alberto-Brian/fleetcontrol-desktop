@@ -15,6 +15,7 @@ import { createFuelStation } from '@/helpers/fuel-station-helpers';
 import { ICreateFuelStation } from '@/lib/types/fuel-station';
 import { useRefuelings } from '@/contexts/RefuelingsContext';
 import { RESTORE_FUEL_STATION } from '@/helpers/ipc/db/fuel_stations/fuel-stations-channels';
+import { PermissionGate } from '@/components/PermissionGate';
 
 interface NewFuelStationDialogProps { onSuccess?: () => void; }
 export default function NewFuelStationDialog({ onSuccess }: NewFuelStationDialogProps) {
@@ -91,12 +92,12 @@ export default function NewFuelStationDialog({ onSuccess }: NewFuelStationDialog
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <PermissionGate permission="fuel_station:create"><DialogTrigger asChild>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
           {t('refuelings:actions.newStation')}
         </Button>
-      </DialogTrigger>
+      </DialogTrigger></PermissionGate>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

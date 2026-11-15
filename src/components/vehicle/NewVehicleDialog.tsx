@@ -18,6 +18,7 @@ import { ICreateVehicle } from '@/lib/types/vehicle';
 import { useVehicles } from '@/contexts/VehiclesContext';
 import { usePermission } from '@/hooks/usePermission';
 import { ImeiSelector } from './ImeiSelector';
+import { PermissionGate } from '@/components/PermissionGate';
 
 interface NewVehicleDialogProps { onSuccess?: () => void; }
 export default function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
@@ -118,12 +119,12 @@ const filteredCategories = categories.filter(cat =>
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <PermissionGate permission="vehicle:create"><DialogTrigger asChild>
         <Button>
           <Plus className="w-4 h-4 mr-2" />
           {t('vehicles:actions.create')}
         </Button>
-      </DialogTrigger>
+      </DialogTrigger></PermissionGate>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t('vehicles:dialogs.new.title')}</DialogTitle>
