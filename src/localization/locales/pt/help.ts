@@ -166,6 +166,7 @@ export const ptHelp = {
         ]},
         { type: 'tip', text: 'As viagens podem ser correlacionadas com os percursos GPS gravados automaticamente pelo Traccar.' },
         { type: 'tip', text: 'Se dois postos mexerem no mesmo veículo ou motorista ao mesmo tempo (ex. ambos o põem numa viagem), o servidor aceita só a primeira acção. A segunda é recusada por inteiro, com um aviso; os dados são actualizados sozinhos e basta confirmar e tentar de novo. Nunca fica uma viagem gravada com o veículo «disponível».' },
+        { type: 'tip', text: 'O estado do veículo e do motorista segue o que está activo: com uma viagem em curso o veículo fica «Em uso»; com uma manutenção em curso fica «Manutenção»; só fica «Disponível» quando não há nenhuma das duas. Por isso não podes mudar à mão o estado de um veículo com viagem ou manutenção aberta, nem iniciar uma manutenção num veículo em viagem — termina ou cancela primeiro.' },
       ],
     },
 

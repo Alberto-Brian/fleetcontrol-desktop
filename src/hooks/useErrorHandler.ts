@@ -11,7 +11,7 @@ import { extractAppError } from '@/helpers/error-helpers';
  * Otimizado para trabalhar com erros do Electron IPC
  */
 export function useErrorHandler() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   /**
    * Trata erros vindos do IPC ou da aplicação
@@ -55,6 +55,18 @@ export function useErrorHandler() {
 
     // Erro genérico - usa fallback
     const message = error instanceof Error ? error.message : String(error);
+
+    // Muitas regras do processo principal lançam só a chave de tradução
+    // (ex. `new Error('maintenances:errors.vehicleOnTrip')`). Pelo IPC chega
+    // como "Error invoking remote method '...': Error: <chave>" e caía sempre
+    // no erro genérico de recurso — o utilizador via "Erro ao..." sem saber
+    // porquê. Se a mensagem trouxer uma chave que existe, mostra-a.
+    const keyMatch = message.match(/([a-z][\w-]*:[a-zA-Z][\w.]*)\s*$/);
+    if (keyMatch && i18n.exists(keyMatch[1])) {
+      toast.error(t(keyMatch[1]) as string);
+      return null;
+    }
+
     const displayMessage = (fallbackKey ? t(fallbackKey) : message) as string;
     toast.error(displayMessage);
     

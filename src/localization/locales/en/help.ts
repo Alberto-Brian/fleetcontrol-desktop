@@ -166,6 +166,7 @@ export const enHelp = {
         ]},
         { type: 'tip', text: 'Trips can be correlated with GPS routes recorded automatically by Traccar.' },
         { type: 'tip', text: 'If two workstations change the same vehicle or driver at the same time (e.g. both put it on a trip), the server accepts only the first action. The second is refused entirely, with a notice; the data refreshes on its own and you just need to check and try again. A trip is never saved with the vehicle left "available".' },
+        { type: 'tip', text: 'Vehicle and driver status follow what is active: with a trip in progress the vehicle is "In use"; with a maintenance in progress it is "Maintenance"; it is only "Available" when neither is open. So you cannot manually change the status of a vehicle with an open trip or maintenance, nor start a maintenance on a vehicle on a trip — finish or cancel first.' },
       ],
     },
 

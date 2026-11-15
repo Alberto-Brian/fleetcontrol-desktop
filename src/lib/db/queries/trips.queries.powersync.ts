@@ -22,6 +22,7 @@ import { IPaginationParams, IPaginatedResult } from '@/lib/types/pagination';
 import { tripStatus } from '@/lib/db/schemas/trips';
 import { vehicleStatus } from '@/lib/db/schemas/vehicles';
 import { driverAvailability } from '@/lib/db/schemas/drivers';
+import { vehicleHasActiveTrip, driverHasActiveTrip, vehicleHasActiveMaintenance, settleAfterTrip } from './vehicle-state.powersync';
 
 // Forma real devolvida (mais rica que ITrip, mesma situação já existia no
 // original — o Drizzle devolvia route_name/vehicle_license/etc. via `as
@@ -95,6 +96,13 @@ export async function createTrip(tripData: ICreateTrip): Promise<ITrip> {
   if (!origin || !destination) throw new Error('trips:errors.originDestinationRequired');
 
   await db.writeTransaction(async (tx) => {
+    // Verificação dentro da mesma transacção (não só o estado gravado, que
+    // pode estar desencontrado): um veículo/motorista só tem uma viagem em
+    // curso, e um veículo em manutenção não sai em viagem.
+    if (await vehicleHasActiveTrip(tx, tripData.vehicle_id)) throw new Error('trips:errors.vehicleNotAvailable');
+    if (await vehicleHasActiveMaintenance(tx, tripData.vehicle_id)) throw new Error('trips:errors.vehicleInMaintenance');
+    if (await driverHasActiveTrip(tx, tripData.driver_id)) throw new Error('trips:errors.driverNotAvailable');
+
     await tx.execute(
       `INSERT INTO trips (
         id, organization_id, trip_code, start_date, status, vehicle_id, driver_id, route_id,
@@ -185,10 +193,11 @@ export async function getActiveTrips(): Promise<ITrip[]> {
 
 export async function completeTrip(tripId: string, completeData: ICompleteTrip): Promise<ITrip | null> {
   const db = await getPowerSyncDb();
-  const row = await db.getOptional<{ vehicle_id: string; driver_id: string; start_mileage: number; notes: string | null }>(
-    `SELECT vehicle_id, driver_id, start_mileage, notes FROM trips WHERE id = ? LIMIT 1`, [tripId],
+  const row = await db.getOptional<{ vehicle_id: string; driver_id: string; start_mileage: number; notes: string | null; status: string }>(
+    `SELECT vehicle_id, driver_id, start_mileage, notes, status FROM trips WHERE id = ? AND deleted_at IS NULL LIMIT 1`, [tripId],
   );
   if (!row) throw new Error('trips:errors.tripNotFound');
+  if (row.status !== tripStatus.IN_PROGRESS) throw new Error('trips:validation.tripNotInProgress');
   if (completeData.end_mileage <= row.start_mileage) throw new Error('trips:errors.endMileageLowerThanStart');
 
   const now = new Date().toISOString();
@@ -197,10 +206,7 @@ export async function completeTrip(tripId: string, completeData: ICompleteTrip):
       `UPDATE trips SET end_mileage = ?, end_date = ?, status = ?, notes = ?, updated_at = ? WHERE id = ?`,
       [completeData.end_mileage, now, tripStatus.COMPLETED, completeData.notes || row.notes, now, tripId],
     );
-    await tx.execute(`UPDATE vehicles SET current_mileage = ?, status = ?, updated_at = ? WHERE id = ?`,
-      [completeData.end_mileage, vehicleStatus.AVAILABLE, now, row.vehicle_id]);
-    await tx.execute(`UPDATE drivers SET availability = ?, updated_at = ? WHERE id = ?`,
-      [driverAvailability.AVAILABLE, now, row.driver_id]);
+    await settleAfterTrip(tx, { tripId, vehicleId: row.vehicle_id, driverId: row.driver_id, now, endMileage: completeData.end_mileage });
   });
 
   return getTripById(tripId);
@@ -208,25 +214,24 @@ export async function completeTrip(tripId: string, completeData: ICompleteTrip):
 
 export async function cancelTrip(tripId: string): Promise<string> {
   const db = await getPowerSyncDb();
-  const row = await db.getOptional<{ vehicle_id: string; driver_id: string }>(
-    `SELECT vehicle_id, driver_id FROM trips WHERE id = ? LIMIT 1`, [tripId],
+  const row = await db.getOptional<{ vehicle_id: string; driver_id: string; status: string }>(
+    `SELECT vehicle_id, driver_id, status FROM trips WHERE id = ? AND deleted_at IS NULL LIMIT 1`, [tripId],
   );
   if (!row) throw new Error('trips:errors.tripNotFound');
+  if (row.status !== tripStatus.IN_PROGRESS) throw new Error('trips:validation.tripNotInProgress');
 
   const now = new Date().toISOString();
   await db.writeTransaction(async (tx) => {
     await tx.execute(`UPDATE trips SET status = ?, updated_at = ? WHERE id = ?`, [tripStatus.CANCELLED, now, tripId]);
-    await tx.execute(`UPDATE vehicles SET status = ?, updated_at = ? WHERE id = ?`, [vehicleStatus.AVAILABLE, now, row.vehicle_id]);
-    await tx.execute(`UPDATE drivers SET availability = ?, updated_at = ? WHERE id = ?`, [driverAvailability.AVAILABLE, now, row.driver_id]);
+    await settleAfterTrip(tx, { tripId, vehicleId: row.vehicle_id, driverId: row.driver_id, now });
   });
 
   return tripId;
 }
 
 /**
- * Soft-delete de uma viagem. Se estiver IN_PROGRESS, restaura veículo e
- * motorista para disponível antes de apagar (mesma correcção crítica já
- * documentada no ficheiro original — sem isto ambos ficavam presos).
+ * Soft-delete de uma viagem. Se estiver IN_PROGRESS, liberta o veículo e o
+ * motorista (só se não tiverem outra viagem em curso — settleAfterTrip).
  */
 export async function deleteTrip(tripId: string): Promise<string> {
   const db = await getPowerSyncDb();
@@ -237,11 +242,10 @@ export async function deleteTrip(tripId: string): Promise<string> {
 
   const now = new Date().toISOString();
   await db.writeTransaction(async (tx) => {
-    if (row.status === tripStatus.IN_PROGRESS) {
-      await tx.execute(`UPDATE vehicles SET status = ?, updated_at = ? WHERE id = ?`, [vehicleStatus.AVAILABLE, now, row.vehicle_id]);
-      await tx.execute(`UPDATE drivers SET availability = ?, updated_at = ? WHERE id = ?`, [driverAvailability.AVAILABLE, now, row.driver_id]);
-    }
     await tx.execute(`UPDATE trips SET deleted_at = ?, updated_at = ? WHERE id = ?`, [now, now, tripId]);
+    if (row.status === tripStatus.IN_PROGRESS) {
+      await settleAfterTrip(tx, { tripId, vehicleId: row.vehicle_id, driverId: row.driver_id, now });
+    }
   });
 
   return tripId;

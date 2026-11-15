@@ -70,7 +70,9 @@ export default function NewMaintenanceDialog({ onSuccess }: NewMaintenanceDialog
   async function loadData() {
     try {
       const [vehiclesData, workshopsData] = await Promise.all([
-        getAllVehicles(),
+        // Sem limite explícito a consulta devolve só 60 — numa frota maior os
+        // restantes veículos nunca apareciam no seletor.
+        getAllVehicles({ limit: 10000 }),
         getAllWorkshops(),
       ]);
       setVehicles(vehiclesData.data.filter((v: any) => v.status !== 'inactive'));
@@ -123,7 +125,12 @@ export default function NewMaintenanceDialog({ onSuccess }: NewMaintenanceDialog
   const selectedVehicle = vehicles.find((v) => v.id === formData.vehicle_id);
 
   // Opções para veículos — pesquisa por matrícula, marca, modelo
-  const vehicleOptions: SearchableSelectOption[] = vehicles.map((v) => ({
+  // Iniciar já: um veículo em viagem não pode entrar em manutenção (o
+  // processo principal também recusa). Só agendar: continua a aparecer,
+  // marcado como "Em uso".
+  const vehicleOptions: SearchableSelectOption[] = vehicles
+    .filter((v) => !(startNow && v.status === 'in_use'))
+    .map((v) => ({
     value: v.id,
     searchText: `${v.license_plate} ${v.brand} ${v.model}`,
     label: (
@@ -131,6 +138,9 @@ export default function NewMaintenanceDialog({ onSuccess }: NewMaintenanceDialog
         <span className="font-mono font-bold">{v.license_plate}</span>
         <span className="text-muted-foreground">—</span>
         <span>{v.brand} {v.model}</span>
+        {v.status === 'in_use' && (
+          <span className="text-xs text-amber-600">({t('vehicles:status.in_use.label')})</span>
+        )}
       </div>
     ),
     selectedLabel: <span className="font-mono font-semibold">{v.license_plate} — {v.brand} {v.model}</span>,
@@ -364,7 +374,11 @@ export default function NewMaintenanceDialog({ onSuccess }: NewMaintenanceDialog
 
           {/* Iniciar agora */}
           <div className="flex items-center space-x-2 p-3 bg-muted/50 rounded-lg border">
-            <Checkbox id="start_now" checked={startNow} onCheckedChange={(checked) => setStartNow(checked as boolean)} />
+            <Checkbox id="start_now" checked={startNow} onCheckedChange={(checked) => {
+              const next = checked as boolean;
+              setStartNow(next);
+              if (next && selectedVehicle?.status === 'in_use') setFormData((f) => ({ ...f, vehicle_id: '' }));
+            }} />
             <label htmlFor="start_now" className="text-sm font-medium leading-none cursor-pointer">
               {t('maintenances:actions.startNowDescription')}
             </label>

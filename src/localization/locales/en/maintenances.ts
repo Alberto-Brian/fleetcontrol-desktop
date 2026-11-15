@@ -231,6 +231,8 @@ export const enMaintenances = {
   },
 
   errors: {
+    vehicleOnTrip: 'The vehicle is on a trip in progress — finish the trip before starting the maintenance',
+    maintenanceNotActive: 'Only a scheduled or in-progress maintenance can be completed',
     errorLoading: 'Error loading maintenances',
     errorLoadingCategories: 'Error loading categories',
     maintenanceNotFound: 'Maintenance not found',

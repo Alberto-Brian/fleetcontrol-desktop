@@ -19,6 +19,7 @@ import { generateUuid } from '@/lib/utils/cripto';
 import { ICreateMaintenance, IUpdateMaintenance, IMaintenance } from '@/lib/types/maintenance';
 import { IPaginatedResult, IPaginationParams } from '@/lib/types/pagination';
 import { maintenanceStatus } from '@/lib/db/schemas/maintenances';
+import { startMaintenanceOnVehicle, settleAfterMaintenance } from './vehicle-state.powersync';
 
 interface MaintenanceRow {
   id: string; vehicle_id: string; category_id: string; workshop_id: string | null; type: string;
@@ -90,6 +91,12 @@ export async function createMaintenance(maintenanceData: ICreateMaintenance): Pr
   const priority = maintenanceData.priority || 'normal';
 
   await db.writeTransaction(async (tx) => {
+    // Antes do INSERT: um veículo em viagem não pode entrar em manutenção
+    // (startMaintenanceOnVehicle recusa), e nada fica gravado nesse caso.
+    if (status === maintenanceStatus.IN_PROGRESS) {
+      await startMaintenanceOnVehicle(tx, maintenanceData.vehicle_id, now);
+    }
+
     await tx.execute(
       `INSERT INTO maintenance (
         id, organization_id, vehicle_id, category_id, workshop_id, type, entry_date, mileage,
@@ -104,10 +111,6 @@ export async function createMaintenance(maintenanceData: ICreateMaintenance): Pr
         now, now,
       ],
     );
-
-    if (status === maintenanceStatus.IN_PROGRESS) {
-      await tx.execute(`UPDATE vehicles SET status = 'maintenance', updated_at = ? WHERE id = ?`, [now, maintenanceData.vehicle_id]);
-    }
   });
 
   return (await getMaintenanceById(id)) as IMaintenance;
@@ -188,9 +191,12 @@ export async function updateMaintenance(maintenanceId: string, maintenanceData: 
       );
     }
 
-    if (maintenanceData.status === maintenanceStatus.IN_PROGRESS && current.status !== maintenanceStatus.IN_PROGRESS) {
-      await tx.execute(`UPDATE vehicles SET status = 'maintenance', updated_at = ? WHERE id = ?`, [now, current.vehicle_id]);
-    }
+    const startsNow = maintenanceData.status === maintenanceStatus.IN_PROGRESS && current.status !== maintenanceStatus.IN_PROGRESS;
+    const stopsNow  = maintenanceData.status !== undefined
+      && maintenanceData.status !== maintenanceStatus.IN_PROGRESS
+      && current.status === maintenanceStatus.IN_PROGRESS;
+    if (startsNow) await startMaintenanceOnVehicle(tx, current.vehicle_id, now);
+    if (stopsNow)  await settleAfterMaintenance(tx, { maintenanceId, vehicleId: current.vehicle_id, now });
   });
 
   return getMaintenanceById(maintenanceId);
@@ -199,10 +205,15 @@ export async function updateMaintenance(maintenanceId: string, maintenanceData: 
 export async function completeMaintenance(maintenanceId: string, completeData: IUpdateMaintenance): Promise<IMaintenance | null> {
   const db = await getPowerSyncDb();
 
-  const current = await db.getOptional<{ vehicle_id: string; parts_cost: number; labor_cost: number }>(
-    `SELECT vehicle_id, parts_cost, labor_cost FROM maintenance WHERE id = ? LIMIT 1`, [maintenanceId],
+  const current = await db.getOptional<{ vehicle_id: string; status: string; parts_cost: number; labor_cost: number }>(
+    `SELECT vehicle_id, status, parts_cost, labor_cost FROM maintenance WHERE id = ? AND deleted_at IS NULL LIMIT 1`, [maintenanceId],
   );
   if (!current) throw new Error('maintenances:errors.maintenanceNotFound');
+  // Só se conclui o que está agendado ou em curso — concluir duas vezes
+  // libertava o veículo de novo, mesmo que já estivesse noutra viagem.
+  if (current.status !== maintenanceStatus.IN_PROGRESS && current.status !== maintenanceStatus.SCHEDULED) {
+    throw new Error('maintenances:errors.maintenanceNotActive');
+  }
 
   const partsCost = completeData.parts_cost ?? current.parts_cost;
   const laborCost = completeData.labor_cost ?? current.labor_cost;
@@ -225,7 +236,7 @@ export async function completeMaintenance(maintenanceId: string, completeData: I
       `UPDATE maintenance SET ${extraSet} parts_cost = ?, labor_cost = ?, total_cost = ?, exit_date = ?, status = ?, updated_at = ? WHERE id = ?`,
       [...extraFields.map(f => updateData[f]), partsCost, laborCost, totalCost, now, maintenanceStatus.COMPLETED, now, maintenanceId],
     );
-    await tx.execute(`UPDATE vehicles SET status = 'available', updated_at = ? WHERE id = ?`, [now, current.vehicle_id]);
+    await settleAfterMaintenance(tx, { maintenanceId, vehicleId: current.vehicle_id, now });
   });
 
   return getMaintenanceById(maintenanceId);
@@ -250,10 +261,19 @@ export async function getMaintenancesByCategory(categoryId: string) {
 export async function deleteMaintenance(maintenanceId: string): Promise<string> {
   const db = await getPowerSyncDb();
   const now = new Date().toISOString();
-  await db.execute(
-    `UPDATE maintenance SET deleted_at = ?, status = ?, updated_at = ? WHERE id = ?`,
-    [now, maintenanceStatus.CANCELLED, now, maintenanceId],
+  const current = await db.getOptional<{ vehicle_id: string; status: string }>(
+    `SELECT vehicle_id, status FROM maintenance WHERE id = ? AND deleted_at IS NULL LIMIT 1`, [maintenanceId],
   );
+  await db.writeTransaction(async (tx) => {
+    await tx.execute(
+      `UPDATE maintenance SET deleted_at = ?, status = ?, updated_at = ? WHERE id = ?`,
+      [now, maintenanceStatus.CANCELLED, now, maintenanceId],
+    );
+    // Apagar uma manutenção em curso deixava o veículo preso em "manutenção".
+    if (current?.status === maintenanceStatus.IN_PROGRESS) {
+      await settleAfterMaintenance(tx, { maintenanceId, vehicleId: current.vehicle_id, now });
+    }
+  });
   return maintenanceId;
 }
 

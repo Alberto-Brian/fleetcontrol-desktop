@@ -35,6 +35,7 @@ import { scheduledTripStatus } from '@/lib/db/schemas/scheduled_trips';
 import { tripStatus } from '@/lib/db/schemas/trips';
 import { vehicleStatus } from '@/lib/db/schemas/vehicles';
 import { driverStatus, driverAvailability } from '@/lib/db/schemas/drivers';
+import { vehicleHasActiveTrip, vehicleHasActiveMaintenance, driverHasActiveTrip } from './vehicle-state.powersync';
 
 function todayStr(): string {
   return new Date().toISOString().split('T')[0];
@@ -302,8 +303,7 @@ export async function processScheduledTrips(): Promise<{
       continue;
     }
 
-    await launchScheduledTrip(db, st);
-    launched.push(st.id);
+    if (await launchScheduledTrip(db, st)) launched.push(st.id);
   }
 
   const pendingLeaveRows = await db.getAll<DueRow>(
@@ -329,8 +329,7 @@ export async function processScheduledTrips(): Promise<{
       continue;
     }
 
-    await launchScheduledTrip(db, st);
-    launched.push(st.id);
+    if (await launchScheduledTrip(db, st)) launched.push(st.id);
   }
 
   return { launched, pendingLeave, autoCancelled };
@@ -339,13 +338,22 @@ export async function processScheduledTrips(): Promise<{
 async function launchScheduledTrip(
   db: Awaited<ReturnType<typeof getPowerSyncDb>>,
   st: { id: string; driver_id: string; vehicle_id: string; route_id: string | null; origin: string | null; destination: string | null; purpose: string | null; notes: string | null },
-): Promise<void> {
+): Promise<boolean> {
   const tripId = generateUuid();
   const tripCode = generateTripCode();
   const now = new Date().toISOString();
   const organizationId = getSessionOrganizationId();
 
-  await db.writeTransaction(async (tx) => {
+  return db.writeTransaction(async (tx) => {
+    // 2026-11-15 — sem isto, uma agendada lançava sobre um veículo já em
+    // viagem/manutenção ou um motorista já em viagem. Fica agendada e volta
+    // a ser tentada na próxima passagem do scheduler.
+    if (await vehicleHasActiveTrip(tx, st.vehicle_id)
+      || await vehicleHasActiveMaintenance(tx, st.vehicle_id)
+      || await driverHasActiveTrip(tx, st.driver_id)) {
+      return false;
+    }
+
     await tx.execute(
       `INSERT INTO trips (
         id, organization_id, trip_code, start_date, status, vehicle_id, driver_id, route_id,
@@ -360,5 +368,6 @@ async function launchScheduledTrip(
       `UPDATE scheduled_trips SET status = ?, trip_id = ?, launched_at = ?, updated_at = ? WHERE id = ?`,
       [scheduledTripStatus.LAUNCHED, tripId, now, now, st.id],
     );
+    return true;
   });
 }

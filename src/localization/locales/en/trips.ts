@@ -127,6 +127,7 @@ export const enTrips = {
   },
 
   errors: {
+    vehicleInMaintenance: 'The vehicle has a maintenance in progress — complete it before starting a trip',
     errorLoading: 'Error loading trips',
     routeNotFound: 'Route not found',
     originDestinationRequired: 'Origin and destination are required',

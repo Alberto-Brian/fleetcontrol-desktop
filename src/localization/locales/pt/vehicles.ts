@@ -331,6 +331,9 @@ export const ptVehicles = {
   },
 
   errors: {
+    inUseOnlyByTrip: "O estado «Em uso» é definido automaticamente ao iniciar uma viagem",
+    statusLockedByTrip: "O veículo tem uma viagem em curso — termina ou cancela a viagem para mudar o estado",
+    statusLockedByMaintenance: "O veículo tem uma manutenção em curso — conclui-a ou cancela-a para mudar o estado",
     errorLoading: "Erro ao carregar veículos",
     errorLoadingCategories: "Erro ao carregar categorias",
     vehicleNotFound: "Veículo não encontrado",

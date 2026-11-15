@@ -42,6 +42,7 @@ import { generateUuid } from '@/lib/utils/cripto';
 import { ICreateVehicle, IUpdateVehicle, IVehicle, IUpdateStatus } from '@/lib/types/vehicle';
 import { IPaginatedResult, IPaginationParams } from '@/lib/types/pagination';
 import { vehicleStatus } from '@/lib/db/schemas/vehicles';
+import { vehicleHasActiveTrip, vehicleHasActiveMaintenance } from './vehicle-state.powersync';
 
 interface VehicleRow {
   id: string; category_id: string; license_plate: string; brand: string; model: string;
@@ -265,10 +266,21 @@ export async function getAvailableVehicles() {
  */
 export async function updateVehicleStatus(vehicleId: string, data: IUpdateStatus) {
   const db = await getPowerSyncDb();
-  await db.execute(
-    `UPDATE vehicles SET status = ?, notes = ?, updated_at = ? WHERE id = ?`,
-    [data.status, data.notes ?? null, new Date().toISOString(), vehicleId],
-  );
+  await db.writeTransaction(async (tx) => {
+    // 2026-11-15 — a mudança manual não pode contradizer uma viagem ou uma
+    // manutenção em curso (era assim que um veículo ficava "disponível" com
+    // a viagem aberta). "Em uso" só nasce de uma viagem; o fim da viagem ou
+    // da manutenção é que liberta o veículo.
+    if (data.status === vehicleStatus.IN_USE) throw new Error('vehicles:errors.inUseOnlyByTrip');
+    if (await vehicleHasActiveTrip(tx, vehicleId)) throw new Error('vehicles:errors.statusLockedByTrip');
+    if (data.status !== vehicleStatus.MAINTENANCE && await vehicleHasActiveMaintenance(tx, vehicleId)) {
+      throw new Error('vehicles:errors.statusLockedByMaintenance');
+    }
+    await tx.execute(
+      `UPDATE vehicles SET status = ?, notes = ?, updated_at = ? WHERE id = ?`,
+      [data.status, data.notes ?? null, new Date().toISOString(), vehicleId],
+    );
+  });
   return findVehicleById(vehicleId);
 }
 

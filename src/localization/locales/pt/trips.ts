@@ -127,6 +127,7 @@ export const ptTrips = {
   },
 
   errors: {
+    vehicleInMaintenance: 'O veículo tem uma manutenção em curso — conclui-a antes de iniciar uma viagem',
     errorLoading: 'Erro ao carregar viagens',
     routeNotFound: 'Rota não encontrada',
     originDestinationRequired: 'Origem e destino são obrigatórios',

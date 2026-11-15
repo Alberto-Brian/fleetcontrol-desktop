@@ -331,6 +331,9 @@ export const enVehicles = {
   },
 
   errors: {
+    inUseOnlyByTrip: "The \"In use\" status is set automatically when a trip starts",
+    statusLockedByTrip: "The vehicle has a trip in progress — finish or cancel the trip to change its status",
+    statusLockedByMaintenance: "The vehicle has a maintenance in progress — complete or cancel it to change its status",
     errorLoading: "Error loading vehicles",
     errorLoadingCategories: "Error loading categories",
     vehicleNotFound: "Vehicle not found",

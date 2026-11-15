@@ -230,6 +230,8 @@ export const ptMaintenances = {
   },
 
   errors: {
+    vehicleOnTrip: 'O veículo está numa viagem em curso — termina a viagem antes de iniciar a manutenção',
+    maintenanceNotActive: 'Só é possível concluir uma manutenção agendada ou em curso',
     errorLoading: 'Erro ao carregar manutenções',
     errorLoadingCategories: 'Erro ao carregar categorias',
     maintenanceNotFound: 'Manutenção não encontrada',
