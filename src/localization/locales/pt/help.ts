@@ -165,6 +165,7 @@ export const ptHelp = {
           'Ao terminar, actualiza com data de chegada e odómetro final',
         ]},
         { type: 'tip', text: 'As viagens podem ser correlacionadas com os percursos GPS gravados automaticamente pelo Traccar.' },
+        { type: 'tip', text: 'Se dois postos mexerem no mesmo veículo ou motorista ao mesmo tempo (ex. ambos o põem numa viagem), o servidor aceita só a primeira acção. A segunda é recusada por inteiro, com um aviso; os dados são actualizados sozinhos e basta confirmar e tentar de novo. Nunca fica uma viagem gravada com o veículo «disponível».' },
       ],
     },
 

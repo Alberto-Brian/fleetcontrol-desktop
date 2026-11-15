@@ -108,6 +108,10 @@ export class PowerSyncConnector implements PowerSyncBackendConnector {
         table: op.table,
         op:    op.op as 'PUT' | 'PATCH' | 'DELETE',
         data:  op.opData,
+        // Valor dos campos alterados ANTES desta escrita (trackPrevious em
+        // schema.ts) — a versão de base que o servidor compara com a linha
+        // real para detectar conflitos. Ausente em INSERTs.
+        previous: op.previousValues,
       }));
 
       const { data } = await axios.post<IUploadPowerSyncChangesResult>(

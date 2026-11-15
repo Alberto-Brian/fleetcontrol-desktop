@@ -33,7 +33,19 @@
 export async function loadAppSchema() {
   const { column, Schema, Table } = await import('@powersync/node');
 
-  const vehicles = new Table({
+  // 2026-11-15 — cada UPDATE local passa a levar o valor ANTERIOR dos campos
+  // que mudou (CrudEntry.previousValues). O servidor usa-o como versão de
+  // base para detectar conflitos de verdade (ex. dois Desktops a pôr o mesmo
+  // veículo em viagens diferentes). Antes, a única "base" disponível era o
+  // updated_at do próprio opData — que é a hora da escrita local, nunca a
+  // versão que o cliente tinha — e o servidor rejeitava por engano quase
+  // todas as mudanças de estado (veículo "disponível" com viagem em curso).
+  const table = (
+    columns: ConstructorParameters<typeof Table>[0],
+    options: Record<string, unknown> = {},
+  ) => new Table(columns, { ...options, trackPrevious: { onlyWhenChanged: true } });
+
+  const vehicles = table({
     organization_id:    column.text,
     category_id:         column.text,
     traccar_device_id:   column.text,
@@ -63,7 +75,7 @@ export async function loadAppSchema() {
     deleted_by:          column.text,
   });
 
-  const drivers = new Table({
+  const drivers = table({
     organization_id:     column.text,
     name:                column.text,
     tax_id:              column.text,
@@ -92,7 +104,7 @@ export async function loadAppSchema() {
     deleted_by:          column.text,
   });
 
-  const trips = new Table(
+  const trips = table(
     {
       organization_id: column.text,
       vehicle_id:      column.text,
@@ -119,7 +131,7 @@ export async function loadAppSchema() {
     { indexes: { vehicle: ['vehicle_id'] } },
   );
 
-  const fuel = new Table(
+  const fuel = table(
     {
       organization_id: column.text,
       vehicle_id:      column.text,
@@ -148,7 +160,7 @@ export async function loadAppSchema() {
     { indexes: { vehicle: ['vehicle_id'] } },
   );
 
-  const maintenance = new Table(
+  const maintenance = table(
     {
       organization_id: column.text,
       vehicle_id:      column.text,
@@ -181,7 +193,7 @@ export async function loadAppSchema() {
     { indexes: { vehicle: ['vehicle_id'] } },
   );
 
-  const expenses = new Table(
+  const expenses = table(
     {
       organization_id: column.text,
       vehicle_id:      column.text,
@@ -216,7 +228,7 @@ export async function loadAppSchema() {
   //    categories); fine/vehicle_document/scheduled_trip/maintenance_item
   //    têm vehicle_id (directo ou, no caso de maintenance_item, via
   //    maintenance_id — indexado localmente na mesma). ───────────────────
-  const routes = new Table({
+  const routes = table({
     organization_id:          column.text,
     name:                     column.text,
     origin:                   column.text,
@@ -235,7 +247,7 @@ export async function loadAppSchema() {
     deleted_by:               column.text,
   });
 
-  const workshops = new Table({
+  const workshops = table({
     organization_id: column.text,
     name:            column.text,
     phone:           column.text,
@@ -254,7 +266,7 @@ export async function loadAppSchema() {
     deleted_by:      column.text,
   });
 
-  const fuel_stations = new Table({
+  const fuel_stations = table({
     organization_id:        column.text,
     name:                   column.text,
     brand:                  column.text,
@@ -274,7 +286,7 @@ export async function loadAppSchema() {
     deleted_by:             column.text,
   });
 
-  const maintenance_categories = new Table({
+  const maintenance_categories = table({
     organization_id: column.text,
     name:            column.text,
     type:            column.text,
@@ -289,7 +301,7 @@ export async function loadAppSchema() {
     deleted_by:      column.text,
   });
 
-  const fines = new Table(
+  const fines = table(
     {
       organization_id:    column.text,
       vehicle_id:         column.text,
@@ -317,7 +329,7 @@ export async function loadAppSchema() {
     { indexes: { vehicle: ['vehicle_id'] } },
   );
 
-  const vehicle_documents = new Table(
+  const vehicle_documents = table(
     {
       organization_id: column.text,
       vehicle_id:      column.text,
@@ -338,7 +350,7 @@ export async function loadAppSchema() {
     { indexes: { vehicle: ['vehicle_id'] } },
   );
 
-  const maintenance_items = new Table(
+  const maintenance_items = table(
     {
       organization_id: column.text,
       maintenance_id:  column.text,
@@ -357,7 +369,7 @@ export async function loadAppSchema() {
     { indexes: { maintenance: ['maintenance_id'] } },
   );
 
-  const scheduled_trips = new Table(
+  const scheduled_trips = table(
     {
       organization_id:  column.text,
       driver_id:        column.text,
@@ -383,7 +395,7 @@ export async function loadAppSchema() {
     { indexes: { vehicle: ['vehicle_id'] } },
   );
 
-  const categories = new Table({
+  const categories = table({
     organization_id: column.text,
     name:            column.text,
     description:     column.text,

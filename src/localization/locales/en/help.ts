@@ -165,6 +165,7 @@ export const enHelp = {
           'On completion, update with arrival date and final odometer',
         ]},
         { type: 'tip', text: 'Trips can be correlated with GPS routes recorded automatically by Traccar.' },
+        { type: 'tip', text: 'If two workstations change the same vehicle or driver at the same time (e.g. both put it on a trip), the server accepts only the first action. The second is refused entirely, with a notice; the data refreshes on its own and you just need to check and try again. A trip is never saved with the vehicle left "available".' },
       ],
     },
 
