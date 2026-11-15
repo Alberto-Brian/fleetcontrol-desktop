@@ -81,7 +81,7 @@ export function MaintenancePageContent() {
   const [workshopSearch, setWorkshopSearch] = useState('');
 
   // Paginação
-  const { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage } = usePagePagination('maintenances');
+  const { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage, clampToTotalPages } = usePagePagination('maintenances');
   const [paginationInfo, setPaginationInfo] = useState({
     total: 0, page: 1, limit: 20, totalPages: 0, hasNextPage: false, hasPrevPage: false,
   });
@@ -172,6 +172,7 @@ export function MaintenancePageContent() {
       setMaintenances(result.data);
       setAnalyticsMaintenances(analytics.data);
       setPaginationInfo(result.pagination);
+      clampToTotalPages(result.pagination.totalPages);
       if (result.statusCounts) setStatusCounts(result.statusCounts as typeof statusCounts);
     } catch (error) {
       handleError(error, 'maintenances:errors.errorLoading');

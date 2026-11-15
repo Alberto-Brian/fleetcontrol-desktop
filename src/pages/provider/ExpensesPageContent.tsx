@@ -79,7 +79,7 @@ export default function ExpensesPageContent() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   // Paginação
-  const { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage } = usePagePagination('expenses');
+  const { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage, clampToTotalPages } = usePagePagination('expenses');
   const [paginationInfo, setPaginationInfo] = useState({
     total: 0, page: 1, limit: 20, totalPages: 0, hasNextPage: false, hasPrevPage: false,
   });
@@ -153,6 +153,7 @@ export default function ExpensesPageContent() {
       setExpenses(result.data);
       setAnalyticsExpenses(analytics.data);
       setPaginationInfo(result.pagination);
+      clampToTotalPages(result.pagination.totalPages);
       if (result.statusCounts) setStats(result.statusCounts as typeof stats);
     } catch (error) {
       handleError(error, 'expenses:errors.errorLoading');

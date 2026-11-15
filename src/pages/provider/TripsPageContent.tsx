@@ -77,7 +77,7 @@ export default function TripsPageContent() {
   const [routeSearch, setRouteSearch]   = useState('');
 
   // Paginação
-  const { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage } = usePagePagination('trips');
+  const { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage, clampToTotalPages } = usePagePagination('trips');
   const [paginationInfo, setPaginationInfo] = useState({
     total: 0, page: 1, limit: 20, totalPages: 0, hasNextPage: false, hasPrevPage: false,
   });
@@ -143,6 +143,7 @@ export default function TripsPageContent() {
 
       setTrips(result.data);
       setPaginationInfo(result.pagination);
+      clampToTotalPages(result.pagination.totalPages);
 
       if (result.statusCounts) {
         setStatusCounts(result.statusCounts as typeof statusCounts);

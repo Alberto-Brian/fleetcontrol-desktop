@@ -85,7 +85,7 @@ export default function DriversPageContent() {
   const [driverShiftsMap, setDriverShiftsMap] = useState<Record<string, IDriverShiftBadge[]>>({});
 
   // Paginação
-  const { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage } = usePagePagination('drivers');
+  const { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage, clampToTotalPages } = usePagePagination('drivers');
   const [paginationInfo, setPaginationInfo] = useState({
     total: 0, page: 1, limit: 20, totalPages: 0, hasNextPage: false, hasPrevPage: false,
   });
@@ -157,6 +157,7 @@ export default function DriversPageContent() {
       setDrivers(result.data);
       setAnalyticsDrivers(analytics.data);
       setPaginationInfo(result.pagination);
+      clampToTotalPages(result.pagination.totalPages);
       if (result.statusCounts) setStatusCounts(result.statusCounts as typeof statusCounts);
     } catch (error) {
       handleError(error, 'drivers:errors.errorLoading');

@@ -102,7 +102,7 @@ export default function VehiclesPageContent() {
   }
 
   // Paginação
-  const { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage } = usePagePagination('vehicles');
+  const { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage, clampToTotalPages } = usePagePagination('vehicles');
   const [paginationInfo, setPaginationInfo] = useState({
     total: 0,
     page: 1,
@@ -210,6 +210,7 @@ export default function VehiclesPageContent() {
       setVehicles(result.data);
       setAnalyticsVehicles(analytics.data);
       setPaginationInfo(result.pagination);
+      clampToTotalPages(result.pagination.totalPages);
       if (result.statusCounts) {
         setStatusCounts(result.statusCounts as typeof statusCounts);
       }

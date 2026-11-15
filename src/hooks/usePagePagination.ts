@@ -57,5 +57,15 @@ export function usePagePagination(pageKey: string) {
     }
   }, [pageKey, currentPage]);
 
-  return { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage };
+  // 2026-11-15 — bug real: com "guardar página actual" ligado, uma página
+  // guardada (ex. 3) que deixou de existir (menos registos, ou um utilizador
+  // com âmbito mais pequeno) fazia a listagem vir vazia enquanto os
+  // contadores mostravam os registos. Chamado depois de cada carregamento:
+  // volta à última página válida.
+  const clampToTotalPages = useCallback((totalPages: number) => {
+    const last = Math.max(1, totalPages);
+    if (currentPage > last) setCurrentPage(last);
+  }, [currentPage, setCurrentPage]);
+
+  return { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage, clampToTotalPages };
 }

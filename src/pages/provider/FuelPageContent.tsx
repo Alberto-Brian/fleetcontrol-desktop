@@ -85,7 +85,7 @@ export default function FuelPageContent() {
   const [stationSearch, setStationSearch] = useState('');
 
   // Paginação
-  const { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage } = usePagePagination('fuel');
+  const { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage, clampToTotalPages } = usePagePagination('fuel');
   const [paginationInfo, setPaginationInfo] = useState({
     total: 0, page: 1, limit: 20, totalPages: 0, hasNextPage: false, hasPrevPage: false,
   });
@@ -151,6 +151,7 @@ export default function FuelPageContent() {
       setRefuelings(result.data);
       setAnalyticsRefuelings(analytics.data);
       setPaginationInfo(result.pagination);
+      clampToTotalPages(result.pagination.totalPages);
       if (result.statusCounts) setStats(result.statusCounts as typeof stats);
     } catch (error) {
       handleError(error, 'refuelings:errors.errorLoading');
