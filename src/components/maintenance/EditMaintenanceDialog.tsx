@@ -103,7 +103,7 @@ export default function EditMaintenanceDialog({ open, onOpenChange, onSuccess }:
   async function loadData() {
     try {
       const [vehiclesData, workshopsData, categoriesData] = await Promise.all([
-        getAllVehicles(),
+        getAllVehicles({ limit: 10000 }),
         getAllWorkshops(),
         getAllMaintenanceCategories(),
       ]);

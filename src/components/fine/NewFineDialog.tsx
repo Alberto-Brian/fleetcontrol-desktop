@@ -61,7 +61,7 @@ export default function NewFineDialog({ onSuccess }: NewFineDialogProps) {
 
   async function loadData() {
     try {
-      const [vehiclesData, driversData] = await Promise.all([getAllVehicles(), getAllDrivers()]);
+      const [vehiclesData, driversData] = await Promise.all([getAllVehicles({ limit: 10000 }), getAllDrivers({ limit: 10000 })]);
       setVehicles(vehiclesData.data.filter((v: any) => v.status !== 'inactive'));
       setDrivers(driversData.data.filter((d: any) => d.is_active === true));
     } catch (error) {

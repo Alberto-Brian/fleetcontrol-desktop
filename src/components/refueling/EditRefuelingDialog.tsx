@@ -110,8 +110,8 @@ export default function EditRefuelingDialog({
   async function loadData() {
     try {
       const [vData, dData, tData] = await Promise.all([
-        getAllVehicles(),
-        getAllDrivers(),
+        getAllVehicles({ limit: 10000 }),
+        getAllDrivers({ limit: 10000 }),
         getActiveTrips(),
       ]);
       setVehicles(vData.data.filter((v: any) => v.status !== 'inactive'));
