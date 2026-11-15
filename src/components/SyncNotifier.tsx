@@ -23,6 +23,7 @@ import {
   formatRejectedOperationMessage,
 } from '@/helpers/sync-notifications';
 import type { IRejectedSyncOperation } from '@/lib/powersync/rejected-operation';
+import { refreshCachedPermissions } from '@/helpers/license-helpers';
 
 const BURST_WINDOW_MS = 600;
 
@@ -99,6 +100,9 @@ export function SyncNotifier() {
 
   useEffect(() => {
     return window._service_powersync.onOperationRejected((ops: IRejectedSyncOperation[]) => {
+      // Uma recusa do servidor é o sinal mais claro de que a cópia local das
+      // permissões está desactualizada — relê já, sem esperar pelo temporizador.
+      refreshCachedPermissions(true);
       const locale = i18n.language.startsWith('en') ? 'en' : 'pt';
       ops.forEach((op) => {
         const message = formatRejectedOperationMessage(op, locale);

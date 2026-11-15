@@ -206,6 +206,7 @@ export function hasCachedPermission(code: string): boolean {
 // bug de gating. 3 tentativas com espaçamento crescente antes de desistir.
 async function fetchAndCachePermissions(attempt = 1): Promise<void> {
   if (!_accessToken) return;
+  if (attempt === 1) _lastPermissionsFetch = Date.now();
   try {
     const { data } = await apiClient.get('/api/auth/me/access', {
       headers: { Authorization: `Bearer ${_accessToken}` },
@@ -228,6 +229,38 @@ export const PERMISSIONS_READY_EVENT = 'fc:permissions-ready';
 // refresh) — mesma ideia de LicenseGuard a ouvir este evento para o socket.
 if (typeof window !== 'undefined') {
   window.addEventListener(SESSION_TOKEN_READY_EVENT, () => { void fetchAndCachePermissions(); });
+}
+
+// 2026-11-15 — a cópia local das permissões só era relida no login e na
+// renovação da sessão (~8h): uma permissão dada/retirada por um administrador
+// demorava horas a reflectir-se nos botões e no bloqueio antes de gravar
+// (permission-guard.ts). O servidor sempre decidiu pelo estado actual em cada
+// pedido — isto só actualiza a cópia usada para a UI, sem novo login.
+// Gatilhos, todos baratos (um GET pequeno a /api/auth/me/access):
+//   - a cada 5 min, só com a janela visível e com ligação;
+//   - quando a janela volta a ficar activa ou a ligação regressa;
+//   - logo após uma acção recusada pelo servidor (SyncNotifier, force=true).
+// MIN_GAP evita pedidos repetidos quando vários gatilhos coincidem.
+const PERMISSIONS_REFRESH_MS = 5 * 60_000;
+const PERMISSIONS_MIN_GAP_MS = 30_000;
+let _lastPermissionsFetch = 0;
+
+export function refreshCachedPermissions(force = false): void {
+  if (!_accessToken) return;
+  if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+  if (!force && Date.now() - _lastPermissionsFetch < PERMISSIONS_MIN_GAP_MS) return;
+  void fetchAndCachePermissions();
+}
+
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  setInterval(() => {
+    if (document.visibilityState === 'visible') refreshCachedPermissions();
+  }, PERMISSIONS_REFRESH_MS);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') refreshCachedPermissions();
+  });
+  window.addEventListener('focus', () => refreshCachedPermissions());
+  window.addEventListener('online', () => refreshCachedPermissions());
 }
 
 // Organização da LICENÇA activa deste dispositivo (não da sessão — essa é
