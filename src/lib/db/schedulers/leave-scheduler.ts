@@ -5,40 +5,14 @@
 // Inicializar chamando startLeaveScheduler() no main.ts após o DB estar pronto.
 // ========================================
 
-import axios from 'axios';
 import { processScheduledLeaves, processCompletedLeaves } from '@/lib/db/queries/driver_leaves.queries.powersync';
-import { getApiUrl } from '@/helpers/server-config';
-import { getStoredApiToken } from '@/helpers/ipc/services/auth/token-store';
+import { sessionHasPermissions } from './session-permissions';
 
 const INTERVAL_MS = 5 * 60 * 1000; // 5 minutos
 
 let schedulerTimer: ReturnType<typeof setInterval> | null = null;
 
-// 2026-11-15 — as férias passaram a sincronizar. Este ciclo corre em TODOS os
-// postos; num posto cujo utilizador não pode gerir férias, as gravações
-// automáticas (activar/terminar) seriam recusadas pelo servidor, os dados
-// voltavam atrás, e 5 minutos depois o ciclo tentava outra vez — um aviso
-// de "operação recusada" em loop. Por isso só grava quem tem
-// driver_leave:update. A resposta é guardada: sem ligação usa a última
-// conhecida; sem nenhuma, não grava (o posto de quem tem a permissão trata).
-let canManageLeaves: { token: string; allowed: boolean } | null = null;
-
-async function sessionCanManageLeaves(): Promise<boolean> {
-  const token = getStoredApiToken();
-  if (!token) return false;
-  try {
-    const { data } = await axios.get(`${getApiUrl()}/api/auth/me/access`, {
-      headers: { Authorization: `Bearer ${token}` },
-      timeout: 10_000,
-    });
-    const permissions: string[] = data?.data?.permissions ?? [];
-    canManageLeaves = { token, allowed: permissions.includes('driver_leave:update') };
-  } catch {
-    // sem ligação — mantém a última resposta desta mesma sessão, se houver
-    if (canManageLeaves?.token !== token) return false;
-  }
-  return canManageLeaves?.allowed ?? false;
-}
+// 2026-11-15 — só grava quem pode gerir férias (ver session-permissions.ts).
 
 /**
  * Executa um ciclo completo do scheduler.
@@ -46,7 +20,7 @@ async function sessionCanManageLeaves(): Promise<boolean> {
  */
 export async function runLeaveSchedulerCycle(): Promise<void> {
   try {
-    if (!(await sessionCanManageLeaves())) return;
+    if (!(await sessionHasPermissions(['driver_leave:update']))) return;
 
     // 1. Processar férias que devem começar (scheduled → active/pending_trip)
     const startResult = await processScheduledLeaves();

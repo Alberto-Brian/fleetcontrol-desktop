@@ -1,51 +1,75 @@
-# electric-drizzle
+# FleetControl Desktop
 
-An Electron app to showcase the use of the [`drizzle`](https://orm.drizzle.team) library using the [electron-shadcn](https://github.com/LuanRoger/electron-shadcn) template as base.
+Aplicação Electron (React) de gestão operacional de frotas. Funciona ligada à
+`fleetcontrol-api` e continua a funcionar sem rede: os dados operacionais vivem
+numa base local (`powersync.db`) que sincroniza com o servidor via PowerSync.
 
-![Screenshot](https://github.com/LuanRoger/electric-drizzle/blob/main/images/demo.png)
+## Pré-requisitos
 
-> [!WARNING]
-> This project is just for demo purposes, it will not be actively maintained.
+- **Node.js 20** (ver `.nvmrc`; com nvm: `nvm use`)
+- npm (vem com o Node)
+- Windows: ferramentas de compilação C++ para recompilar o `better-sqlite3`
+  (normalmente já vêm com o Node; se o `postinstall` falhar, instalar as
+  "Desktop development with C++" do Visual Studio Build Tools)
 
-## How to run
+## Instalar as dependências
 
-### Pre-requisites
-
-- Node.js
-- NPM
-- PostgreSQL instance running
-
-It's recomended to use Docker to run the PostgreSQL instance. You can use the following command to start a PostgreSQL instance:
-
-```bash
-docker run --name electric-drizzle-db -p 5432:5432 -d -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=admin postgres
-```
-
-### Steps
-
-1. Clone this repository
-
-2. Install dependencies
+Usar **sempre** este comando — o `npm install` simples falha neste projecto:
 
 ```bash
-npm install
+npm install --legacy-peer-deps --fetch-retries=6 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=180000 --fetch-timeout=900000
 ```
 
-3. Update the database URL:
+Porquê cada opção:
 
-In the [`db_consts.ts`](https://github.com/LuanRoger/electric-drizzle/blob/main/src/lib/db/db_consts.ts) file, update the `dbUrl` constant with the URL of your PostgreSQL instance.
+- `--legacy-peer-deps` — conflito antigo e inofensivo entre
+  `react-leaflet-cluster` (pede `@react-leaflet/core@3`) e `react-leaflet@4`
+  (traz o `@react-leaflet/core@2`). Sem esta opção o npm recusa instalar.
+- `--fetch-retries` / `--fetch-retry-*` / `--fetch-timeout` — em redes
+  instáveis (`ECONNRESET`, timeouts) o npm desiste a meio de pacotes grandes
+  (Electron, binários nativos). Com isto volta a tentar em vez de falhar.
 
-4. Push the schemas to the database
+Se a cache do npm já estiver cheia de uma instalação anterior, acrescentar
+`--prefer-offline` acelera bastante.
+
+No fim corre sozinho o `postinstall` (`npm run rebuild`), que recompila o
+`better-sqlite3` para a versão do Electron. Se este passo falhar, corrigir a
+causa e correr `npm run rebuild` à parte.
+
+### Se a instalação for interrompida
+
+**Nunca interromper um `npm install` a meio** (Ctrl+C, fechar o terminal,
+falta de rede prolongada): deixa pacotes truncados em `node_modules` que a
+instalação seguinte não substitui, e a app falha depois com erros estranhos
+(módulos em falta, `electron-forge` não encontrado, `package.json` vazio).
+
+Se acontecer, limpar e instalar de novo:
+
+1. Fechar o VS Code e qualquer terminal com a app aberta (no Windows os
+   ficheiros ficam bloqueados e não se deixam apagar).
+2. Apagar a pasta `node_modules` (o `package-lock.json` fica).
+3. Confirmar que o `package.json` não ficou vazio — se ficou,
+   `git restore package.json`.
+4. Correr de novo o comando de instalação acima.
+
+## Configurar
+
+Criar um ficheiro `.env` na raiz (não vai para o git) com o endereço da API,
+**sem porta e sem `/api`** (o código acrescenta-o):
+
+```env
+VITE_API_URL=https://app.fleetcontrol.systems
+API_URL=https://app.fleetcontrol.systems
+```
+
+## Correr
 
 ```bash
-npm run db:push
+npm start
 ```
-5. Run the app
+
+## Gerar o instalador
 
 ```bash
-npm run start
+npm run make
 ```
-
-## License
-
-This project is under the MIT license. Check the [LICENSE](https://github.com/LuanRoger/electric-drizzle/blob/main/LICENSE) for more information.

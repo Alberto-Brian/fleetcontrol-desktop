@@ -12,6 +12,7 @@
 // (esses 3 só escrevem em powersync.db desde os Prompts 6.2/6.3/6.5) —
 // ver nota grande em scheduled_trips.queries.powersync.ts.
 import { processScheduledTrips } from '@/lib/db/queries/scheduled_trips.queries.powersync';
+import { sessionHasPermissions } from './session-permissions';
 
 const INTERVAL_MS = 5 * 60 * 1000; // 5 minutos — igual ao leave-scheduler
 
@@ -23,6 +24,12 @@ let schedulerTimer: ReturnType<typeof setInterval> | null = null;
  */
 export async function runTripSchedulerCycle(): Promise<void> {
   try {
+    // 2026-11-16 — só lança quem pode criar viagens e actualizar agendadas
+    // (ver session-permissions.ts). Duplicados entre postos já são travados
+    // pelo servidor: o 2.º posto envia o veículo "disponível → em uso" com o
+    // veículo já em uso, e o lote inteiro dele é recusado.
+    if (!(await sessionHasPermissions(['trip:create', 'scheduled_trip:update']))) return;
+
     const result = await processScheduledTrips();
 
     if (
