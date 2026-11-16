@@ -31,7 +31,7 @@ import {
   setShiftLeader,
   updateShiftMember,
   replaceShiftMembers,
-} from '@/lib/db/queries/driver-shifts.queries';
+} from '@/lib/db/queries/driver-shifts.queries.powersync';
 import {
   ICreateDriverShift,
   IUpdateDriverShift,

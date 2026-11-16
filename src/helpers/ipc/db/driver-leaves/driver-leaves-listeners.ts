@@ -19,7 +19,7 @@ import {
   updateDriverLeave,
   cancelDriverLeave,
   hasOverlappingLeave,
-} from '@/lib/db/queries/driver_leaves.queries';
+} from '@/lib/db/queries/driver_leaves.queries.powersync';
 import { runLeaveSchedulerCycle } from '@/lib/db/schedulers/leave-scheduler';
 import { leaveStatus } from '@/lib/db/schemas/driver_leaves';
 import { ICreateDriverLeave, IUpdateDriverLeave, ICancelDriverLeave, IDriverLeavesPaginationParams } from '@/lib/types/driver-leave';

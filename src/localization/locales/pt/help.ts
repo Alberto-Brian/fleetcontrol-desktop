@@ -141,6 +141,7 @@ export const ptHelp = {
           'Quando a licença termina → disponibilidade regressa a "Disponível" automaticamente',
           'Não é possível alterar a disponibilidade manualmente enquanto o motorista estiver Em Viagem',
         ]},
+        { type: 'tip', text: 'Turnos e férias ficam guardados no servidor e aparecem em todos os postos da organização. As férias são activadas e terminadas automaticamente por quem tem permissão de gerir férias; se o motorista estiver em viagem no dia de início, as férias esperam que a viagem termine.' },
       ],
     },
 

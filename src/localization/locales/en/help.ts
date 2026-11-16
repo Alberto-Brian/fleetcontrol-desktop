@@ -141,6 +141,7 @@ export const enHelp = {
           'When the leave ends → availability automatically returns to "Available"',
           'Availability cannot be changed manually while the driver is On Trip',
         ]},
+        { type: 'tip', text: 'Shifts and leaves are stored on the server and show up on every workstation of the organization. Leaves are started and ended automatically by someone allowed to manage leaves; if the driver is on a trip on the start day, the leave waits for the trip to end.' },
       ],
     },
 

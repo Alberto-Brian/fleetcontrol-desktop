@@ -411,6 +411,66 @@ export async function loadAppSchema() {
     deleted_by:      column.text,
   });
 
+  // 2026-11-15 — turnos e férias de motoristas, antes só no app.db local
+  // (nunca sincronizavam e rebentavam desde que os motoristas passaram para
+  // aqui — FK para uma tabela drivers local vazia). Espelham
+  // fleetcontrol-api/src/db/schemas/driver_{shifts,shift_members,leaves}.schema.ts.
+  const driver_shifts = table({
+    organization_id: column.text,
+    name:            column.text,
+    description:     column.text,
+    start_date:      column.text,
+    end_date:        column.text,
+    start_time:      column.text,
+    end_time:        column.text,
+    status:          column.text,
+    notes:           column.text,
+    created_at:      column.text,
+    created_by:      column.text,
+    updated_at:      column.text,
+    updated_by:      column.text,
+    deleted_at:      column.text,
+    deleted_by:      column.text,
+  });
+
+  const driver_shift_members = table(
+    {
+      organization_id: column.text,
+      shift_id:        column.text,
+      driver_id:       column.text,
+      is_leader:       column.integer,
+      notes:           column.text,
+      created_at:      column.text,
+      created_by:      column.text,
+      updated_at:      column.text,
+      updated_by:      column.text,
+      deleted_at:      column.text,
+      deleted_by:      column.text,
+    },
+    { indexes: { shift: ['shift_id'], driver: ['driver_id'] } },
+  );
+
+  const driver_leaves = table(
+    {
+      organization_id:  column.text,
+      driver_id:        column.text,
+      start_date:       column.text,
+      end_date:         column.text,
+      reason:           column.text,
+      notes:            column.text,
+      status:           column.text,
+      cancelled_at:     column.text,
+      cancelled_reason: column.text,
+      created_at:       column.text,
+      created_by:       column.text,
+      updated_at:       column.text,
+      updated_by:       column.text,
+      deleted_at:       column.text,
+      deleted_by:       column.text,
+    },
+    { indexes: { driver: ['driver_id'] } },
+  );
+
   return new Schema({
     vehicles,
     drivers,
@@ -431,6 +491,9 @@ export async function loadAppSchema() {
     vehicle_documents,
     maintenance_items,
     scheduled_trips,
+    driver_shifts,
+    driver_shift_members,
+    driver_leaves,
   });
 }
 
