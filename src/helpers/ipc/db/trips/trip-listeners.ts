@@ -10,7 +10,6 @@ import {
     GET_ACTIVE_TRIPS,
     COMPLETE_TRIP,
     DELETE_TRIP,          // adicionar ao trips-channels.ts se não existir
-    RECONCILE_TRIPS,      // opcional — para trigger manual da reconciliação
 } from "./trips-channels";
 
 // Fase 6, Prompt 6.5 — powersync.db passa a ser a fonte operacional
@@ -25,7 +24,6 @@ import {
     getActiveTrips,
     isVehicleAvailable,
     isDriverAvailable,
-    reconcileOrphanedStates,
 } from '@/lib/db/queries/trips.queries.powersync';
 
 import { ICreateTrip, ICompleteTrip } from '@/lib/types/trip';
@@ -116,9 +114,4 @@ export function addTripsEventListeners() {
         }
         return deleteTrip(id);
     });
-
-    // ── RECONCILE (opcional — trigger manual) ─────────────────────────────────
-    ipcMain.handle(RECONCILE_TRIPS, async () =>
-        reconcileOrphanedStates()
-    );
 }
