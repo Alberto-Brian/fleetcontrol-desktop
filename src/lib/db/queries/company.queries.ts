@@ -67,10 +67,23 @@ export async function updateCompanySettings(
   const existing = await getCompanySettings();
 
   if (!existing) {
-    return createCompanySettings({
-      company_name: data.company_name ?? 'Empresa',
-      ...data,
-    });
+    // 2026-11-16 — bug real ("UNIQUE constraint failed: company_settings.id"):
+    // a eliminação só marca a linha (deleted_at), não a remove. Se a linha
+    // única já existe apagada, reactiva-a em vez de tentar criar outra com o
+    // mesmo id.
+    const [deleted] = await db.select({ id: company_settings.id })
+      .from(company_settings).where(eq(company_settings.id, COMPANY_ID)).limit(1);
+    if (!deleted) {
+      return createCompanySettings({
+        company_name: data.company_name ?? 'Empresa',
+        ...data,
+      });
+    }
+    await db
+      .update(company_settings)
+      .set({ company_name: 'Empresa', ...data, deleted_at: null, updated_at: new Date().toISOString() })
+      .where(eq(company_settings.id, COMPANY_ID));
+    return (await getCompanySettings())!;
   }
 
   await db

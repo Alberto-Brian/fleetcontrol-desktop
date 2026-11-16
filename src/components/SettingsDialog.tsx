@@ -38,7 +38,7 @@ import { exportBackup, restoreBackup, restoreFromAutoBackup, getBackupConfig, up
 import { getSystemVersion, listDatabases, getDatabaseStats, deleteDatabase, listBackupDatabases } from '@/helpers/system-helpers';
 import { getCompanySettings, updateCompanySettings, uploadCompanyLogo, removeCompanyLogo } from '@/helpers/company-helpers';
 import { getSystemSettings, updateSystemSettings, resetSystemSettings }                    from '@/helpers/system-settings-helpers';
-import { removeLicense, getLicenseSeats, revokeSession, type ILicenseSeats } from '@/helpers/license-helpers';
+import { removeLicense, getLicenseSeats, revokeSession, COMPANY_PROFILE_SYNCED_EVENT, type ILicenseSeats } from '@/helpers/license-helpers';
 import { usePermission } from '@/hooks/usePermission';
 import { listLocalUnlockRecords, removeLocalUnlockRecord, type ILocalUnlockRecord } from '@/helpers/local-users-helpers';
 import { requestNotificationPermission, isAlertSoundEnabled, setAlertSoundEnabled, playAlertSound } from '@/helpers/notifications';
@@ -279,7 +279,13 @@ function CompanyTab() {
   const [isDragging, setIsDragging] = useState(false);
   const { status, isDirty, markDirty, save } = useSaveStatus();
 
-  useEffect(() => { loadSettings(); }, []);
+  useEffect(() => {
+    loadSettings();
+    // Os dados chegam do servidor em segundo plano — actualizar se o
+    // separador estiver aberto quando isso acontecer.
+    window.addEventListener(COMPANY_PROFILE_SYNCED_EVENT, loadSettings);
+    return () => window.removeEventListener(COMPANY_PROFILE_SYNCED_EVENT, loadSettings);
+  }, []);
 
   async function loadSettings() {
     const data = await getCompanySettings();
@@ -329,7 +335,13 @@ function CompanyTab() {
           <h3 className="text-base font-semibold mb-0.5">{t('company.title')}</h3>
           <p className="text-sm text-muted-foreground">{t('company.description')}</p>
         </div>
-        <SaveButton status={status} isDirty={isDirty} onClick={() => save(() => updateCompanySettings(form).then(s => setSettings(s)))} />
+      </div>
+
+      {/* 2026-11-16 — dados vindos da organização no servidor (editados no
+          organization-admin); só o logótipo se define aqui, em cada posto. */}
+      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/20 text-xs text-muted-foreground">
+        <Info className="w-3.5 h-3.5 shrink-0" />
+        <span>{t('company.managedRemotely')}</span>
       </div>
 
       {/* Logo */}
@@ -378,19 +390,19 @@ function CompanyTab() {
         <div className="grid grid-cols-2 gap-4 pt-2">
           <div className="col-span-2 space-y-1.5">
             <Label className="text-xs font-semibold flex items-center gap-1.5"><Building className="w-3.5 h-3.5 text-muted-foreground" />{t('company.name')} *</Label>
-            <Input value={form.company_name ?? ''} onChange={e => handleChange('company_name', e.target.value)} placeholder={t('company.namePlaceholder')} className="h-9 text-sm" />
+            <Input disabled value={form.company_name ?? ''} onChange={e => handleChange('company_name', e.target.value)} placeholder={t('company.namePlaceholder')} className="h-9 text-sm" />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold flex items-center gap-1.5"><Hash className="w-3.5 h-3.5 text-muted-foreground" />{t('company.taxId')}</Label>
-            <Input value={form.tax_id ?? ''} onChange={e => handleChange('tax_id', e.target.value)} placeholder={t('company.taxIdPlaceholder')} className="h-9 text-sm" />
+            <Input disabled value={form.tax_id ?? ''} onChange={e => handleChange('tax_id', e.target.value)} placeholder={t('company.taxIdPlaceholder')} className="h-9 text-sm" />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-muted-foreground" />{t('company.phone')}</Label>
-            <Input value={form.phone ?? ''} onChange={e => handleChange('phone', e.target.value)} placeholder={t('company.phonePlaceholder')} className="h-9 text-sm" />
+            <Input disabled value={form.phone ?? ''} onChange={e => handleChange('phone', e.target.value)} placeholder={t('company.phonePlaceholder')} className="h-9 text-sm" />
           </div>
           <div className="col-span-2 space-y-1.5">
             <Label className="text-xs font-semibold flex items-center gap-1.5"><AtSign className="w-3.5 h-3.5 text-muted-foreground" />{t('company.email')}</Label>
-            <Input value={form.email ?? ''} onChange={e => handleChange('email', e.target.value)} placeholder={t('company.emailPlaceholder')} type="email" className="h-9 text-sm" />
+            <Input disabled value={form.email ?? ''} onChange={e => handleChange('email', e.target.value)} placeholder={t('company.emailPlaceholder')} type="email" className="h-9 text-sm" />
           </div>
         </div>
       </SettingSection>
@@ -400,43 +412,23 @@ function CompanyTab() {
         <div className="grid grid-cols-2 gap-4 pt-2">
           <div className="col-span-2 space-y-1.5">
             <Label className="text-xs font-semibold flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-muted-foreground" />{t('company.street')}</Label>
-            <Input value={form.address ?? ''} onChange={e => handleChange('address', e.target.value)} placeholder={t('company.streetPlaceholder')} className="h-9 text-sm" />
+            <Input disabled value={form.address ?? ''} onChange={e => handleChange('address', e.target.value)} placeholder={t('company.streetPlaceholder')} className="h-9 text-sm" />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold">{t('company.city')}</Label>
-            <Input value={form.city ?? ''} onChange={e => handleChange('city', e.target.value)} placeholder={t('company.cityPlaceholder')} className="h-9 text-sm" />
+            <Input disabled value={form.city ?? ''} onChange={e => handleChange('city', e.target.value)} placeholder={t('company.cityPlaceholder')} className="h-9 text-sm" />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold">{t('company.state')}</Label>
-            <Input value={form.state ?? ''} onChange={e => handleChange('state', e.target.value)} placeholder={t('company.statePlaceholder')} className="h-9 text-sm" />
+            <Input disabled value={form.state ?? ''} onChange={e => handleChange('state', e.target.value)} placeholder={t('company.statePlaceholder')} className="h-9 text-sm" />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold">{t('company.postalCode')}</Label>
-            <Input value={form.postal_code ?? ''} onChange={e => handleChange('postal_code', e.target.value)} placeholder={t('company.postalPlaceholder')} className="h-9 text-sm" />
+            <Input disabled value={form.postal_code ?? ''} onChange={e => handleChange('postal_code', e.target.value)} placeholder={t('company.postalPlaceholder')} className="h-9 text-sm" />
           </div>
         </div>
       </SettingSection>
 
-      {/* Regionalização */}
-      <SettingSection title={t('company.regionalization')}>
-        <div className="grid grid-cols-2 gap-4 pt-2">
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">{t('company.currency')}</Label>
-            <Input value={form.currency ?? 'AOA'} onChange={e => handleChange('currency', e.target.value)} placeholder="AOA" className="h-9 text-sm" />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">{t('company.timezone')}</Label>
-            <Input value={form.timezone ?? 'Africa/Luanda'} onChange={e => handleChange('timezone', e.target.value)} placeholder="Africa/Luanda" className="h-9 text-sm" />
-          </div>
-        </div>
-      </SettingSection>
-
-      {isDirty && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400">
-          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-          <span dangerouslySetInnerHTML={{ __html: t('unsavedChanges') }} />
-        </div>
-      )}
     </div>
   );
 }

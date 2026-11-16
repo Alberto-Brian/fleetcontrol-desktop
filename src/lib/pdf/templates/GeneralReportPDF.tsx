@@ -2,7 +2,8 @@
 // FILE: src/lib/pdf/templates/GeneralReportPDF.tsx
 // ========================================
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Svg, Path, Rect } from '@react-pdf/renderer';
+import { Document, Page, Text, View, Image, StyleSheet, Svg, Path, Rect } from '@react-pdf/renderer';
+import { reportStyles, getHeaderCompany } from '../report-design';
 import { Footer, Watermark } from '@/components/PDFComponents';
 import { formatDate, formatCurrency, formatDistance, getPDFSettings } from '../pdf-config-react';
 import { pdfT } from '../pdf-translations';
@@ -233,6 +234,7 @@ interface GeneralReportProps { dashboard: any; dateRange: { start: string; end: 
 export const GeneralReportPDF: React.FC<GeneralReportProps> = ({ dashboard, dateRange }) => {
   const t = pdfT();
   const s = getPDFSettings();
+  const headerCompany = getHeaderCompany();
 
   const totalCost = dashboard?.totalCost || 1;
   const costs = [
@@ -257,9 +259,13 @@ export const GeneralReportPDF: React.FC<GeneralReportProps> = ({ dashboard, date
 
         {/* Header Corporativo Limpo */}
         <View style={styles.headerRow}>
-          <View>
-            <Text style={styles.brandTitle}>{t.reports.general}</Text>
-            <Text style={styles.brandSubtitle}>Relatório Consolidado de Desempenho Operacional</Text>
+          <View style={reportStyles.headerBrand}>
+            {headerCompany.logo ? <Image src={headerCompany.logo} style={reportStyles.headerLogo} /> : null}
+            <View>
+              <Text style={styles.brandTitle}>{t.reports.general}</Text>
+              <Text style={styles.brandSubtitle}>Relatório Consolidado de Desempenho Operacional</Text>
+              {headerCompany.line ? <Text style={reportStyles.companyLine}>{headerCompany.line}</Text> : null}
+            </View>
           </View>
           <View style={styles.dateBadge}>
             <Text style={styles.dateBadgeText}>

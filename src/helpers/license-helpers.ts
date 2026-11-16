@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import i18n from 'i18next';
 import type { ValidatedLicense } from '@/lib/types/licence';
 import { wipeAllLocalUnlockRecords } from '@/helpers/local-users-helpers';
-import { deleteCompanySettings } from '@/helpers/company-helpers';
+import { deleteCompanySettings, updateCompanySettings } from '@/helpers/company-helpers';
 import { resetSystemSettings } from '@/helpers/system-settings-helpers';
 
 // Um AxiosError inteiro, quando logado, imprime config.headers (Authorization:
@@ -214,6 +214,7 @@ async function fetchAndCachePermissions(attempt = 1): Promise<void> {
     _permissions = data?.data?.permissions ?? [];
     _accessScopes = data?.data?.scopes ?? [];
     window.dispatchEvent(new Event(PERMISSIONS_READY_EVENT));
+    void syncCompanyProfile();
   } catch (err) {
     console.warn(`[License] Falha ao obter permissões efectivas (tentativa ${attempt}):`, safeErr(err));
     if (attempt < 3) {
@@ -223,6 +224,38 @@ async function fetchAndCachePermissions(attempt = 1): Promise<void> {
 }
 
 export const PERMISSIONS_READY_EVENT = 'fc:permissions-ready';
+
+// 2026-11-16 — os dados da empresa (cabeçalho dos relatórios) passam a vir da
+// organização no servidor, editados no organization-admin. Vão sendo trazidos
+// nos mesmos momentos das permissões (entrada, foco, a cada 5 min) e gravados
+// na cópia local — offline os relatórios usam a última versão conhecida. O
+// logótipo não vem daqui: continua definido em cada posto.
+async function syncCompanyProfile(): Promise<void> {
+  if (!_accessToken) return;
+  try {
+    const { data } = await apiClient.get('/api/auth/me/organization', {
+      headers: { Authorization: `Bearer ${_accessToken}` },
+    });
+    const org = data?.data;
+    if (!org?.name) return;
+    await updateCompanySettings({
+      company_name: org.name,
+      tax_id:       org.tax_id ?? null,
+      phone:        org.phone ?? null,
+      email:        org.email ?? null,
+      address:      org.address ?? null,
+      city:         org.city ?? null,
+      state:        org.state ?? null,
+      postal_code:  org.postal_code ?? null,
+    });
+    window.dispatchEvent(new Event(COMPANY_PROFILE_SYNCED_EVENT));
+  } catch (err) {
+    // Sem ligação ou API antiga sem este endpoint: mantém a cópia local.
+    console.warn('[License] Não foi possível actualizar os dados da empresa:', safeErr(err));
+  }
+}
+
+export const COMPANY_PROFILE_SYNCED_EVENT = 'fc:company-profile-synced';
 
 // Um único ponto de escuta em vez de chamar fetchAndCachePermissions() nos 3
 // sítios que já disparam SESSION_TOKEN_READY_EVENT (login, restauro de cache,

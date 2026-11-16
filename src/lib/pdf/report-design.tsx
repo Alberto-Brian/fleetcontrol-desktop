@@ -7,8 +7,8 @@
 // Todos os outros templates usam isto para ficarem idênticos ao Geral.
 // (GeneralReportPDF.tsx mantém os seus próprios estilos, iguais aos daqui.)
 import React from 'react';
-import { Text, View, StyleSheet, Svg, Path, Rect, Circle, Polyline } from '@react-pdf/renderer';
-import { formatDate } from './pdf-config-react';
+import { Text, View, Image, StyleSheet, Svg, Path, Rect, Circle, Polyline } from '@react-pdf/renderer';
+import { formatDate, getPDFCompany } from './pdf-config-react';
 
 // ── Ícones vectoriais (Material, 24x24) ─────────────────────────────────────
 const ICON_PATHS = {
@@ -53,6 +53,9 @@ export const reportStyles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f1f5f9',
   },
+  headerBrand: { flexDirection: 'row', alignItems: 'center' },
+  headerLogo: { width: 34, height: 34, objectFit: 'contain', marginRight: 10 },
+  companyLine: { fontSize: 6.5, color: '#94a3b8', marginTop: 3 },
   brandTitle: { fontSize: 16, fontFamily: 'Helvetica-Bold', color: '#0f172a', letterSpacing: -0.3 },
   brandSubtitle: { fontSize: 8, color: '#64748b', marginTop: 2 },
   dateBadge: {
@@ -181,17 +184,38 @@ export const reportStyles = StyleSheet.create({
 
 // ── Componentes ─────────────────────────────────────────────────────────────
 
-/** Cabeçalho: título + subtítulo à esquerda, selo com o período à direita. */
+/**
+ * Cabeçalho: logótipo da empresa (só se estiver definido) + título e
+ * subtítulo à esquerda, selo com o período à direita.
+ *
+ * 2026-11-16 — o logótipo tinha desaparecido dos relatórios desde o redesenho
+ * (ce09186): os templates passaram a usar este componente, que não o
+ * desenhava, e o Header antigo de PDFComponents.tsx deixou de ser usado. Os
+ * dados continuavam a ser carregados (setPDFCompany), só não apareciam.
+ */
+/** Logótipo (só se definido) e linha pequena com o nome e contactos da empresa. */
+export function getHeaderCompany(): { logo: string | null; line: string } {
+  const c = getPDFCompany();
+  const line = [c.name, c.address, c.phone, c.email].filter(Boolean).join('  ·  ');
+  return { logo: c.logo ?? null, line };
+}
+
 export const ReportHeader: React.FC<{
   title: string;
   subtitle?: string;
   dateRange?: { start: string; end: string };
   badge?: string;
-}> = ({ title, subtitle, dateRange, badge }) => (
+}> = ({ title, subtitle, dateRange, badge }) => {
+  const { logo, line } = getHeaderCompany();
+  return (
   <View style={reportStyles.headerRow}>
-    <View>
-      <Text style={reportStyles.brandTitle}>{title}</Text>
-      {subtitle ? <Text style={reportStyles.brandSubtitle}>{subtitle}</Text> : null}
+    <View style={reportStyles.headerBrand}>
+      {logo ? <Image src={logo} style={reportStyles.headerLogo} /> : null}
+      <View>
+        <Text style={reportStyles.brandTitle}>{title}</Text>
+        {subtitle ? <Text style={reportStyles.brandSubtitle}>{subtitle}</Text> : null}
+        {line ? <Text style={reportStyles.companyLine}>{line}</Text> : null}
+      </View>
     </View>
     {(badge || dateRange) ? (
       <View style={reportStyles.dateBadge}>
@@ -201,7 +225,8 @@ export const ReportHeader: React.FC<{
       </View>
     ) : null}
   </View>
-);
+  );
+};
 
 /** Título de secção com linha (maiúsculas pequenas). */
 export const SectionHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (

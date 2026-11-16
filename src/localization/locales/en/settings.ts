@@ -334,6 +334,7 @@ export const enSettings = {
   company: {
     title:          'Company Details',
     description:    'Information that appears in PDF reports and generated documents',
+    managedRemotely: "These details come from the organization and are edited in the administration panel (Company details). Only the logo is set here, stored on this computer.",
     logo:           'Company logo',
     logoDescription:'Appears in the header of all PDF reports.',
     logoHint:       'PNG, JPG, WEBP or SVG · Max 2 MB',

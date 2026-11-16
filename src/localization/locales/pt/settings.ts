@@ -338,6 +338,7 @@ export const ptSettings = {
   company: {
     title:          'Dados da Empresa',
     description:    'Informações que aparecem nos relatórios PDF e documentos gerados',
+    managedRemotely: "Estes dados vêm da organização e editam-se no painel de administração (Dados da empresa). Aqui define-se apenas o logótipo, guardado neste computador.",
     logo:           'Logótipo da empresa',
     logoDescription:'Aparece no cabeçalho de todos os relatórios PDF.',
     logoHint:       'PNG, JPG, WEBP ou SVG · Máximo 2 MB',
